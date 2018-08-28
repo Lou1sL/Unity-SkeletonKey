@@ -12,3 +12,6 @@
 <div align="center">
 <img src="screenshot.png"/>
 </div>
+<div align="center">
+<img src="screenshot2.png"/>
+</div>
