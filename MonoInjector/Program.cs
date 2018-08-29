@@ -8,18 +8,23 @@ namespace MonoInjector
 {
     class Program
     {
-        private static string DLLPath = "InjectedConsole.dll";
-        private static string InjectNameSpace = "InjectedConsole";
-        private static string InjectClass = "InjectionLoader";
+        private static string DLLPath = "Payload.dll";
+        private static string InjectNameSpace = "Payload";
+        private static string InjectClass = "Main";
         private static string InjectMethod = "Inject";
+        private static string EjectMethod = "Eject";
 
         private static Injector injector;
+        private static InjectionConfig injectionConfig;
 
         static void Main(string[] args)
         {
             Injection();
-            Console.WriteLine("注入成功");
-            Console.WriteLine("按任意键退出");
+            Console.WriteLine("按回车键移除");
+            Console.ReadLine();
+
+            Ejection();
+            Console.WriteLine("按回车键退出");
             Console.ReadLine();
         }
 
@@ -30,11 +35,15 @@ namespace MonoInjector
             if (result.Length == 0)
             {
                 Console.WriteLine("没找到Unity游戏进程");
-                return;
+
+                Console.WriteLine("按回车键退出");
+                Console.ReadLine();
+
+                Environment.Exit(0);
             }
 
             MonoProcess target = result[0];
-            
+
             if (target == null)
             {
                 Console.WriteLine("奇怪的错误？");
@@ -58,7 +67,7 @@ namespace MonoInjector
                 return;
             }
 
-            var config = new InjectionConfig
+            injectionConfig = new InjectionConfig
             {
                 Target = target,
                 Assembly = bytes,
@@ -70,16 +79,44 @@ namespace MonoInjector
 
             try
             {
-                injector.Inject(config);
+                injector.Inject(injectionConfig);
             }
             catch (ApplicationException ae)
             {
                 Console.WriteLine($"注入失败: {ae.Message}");
+                return;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"奇怪的错误: {ex.Message} {ex.StackTrace}");
+                return;
             }
+
+
+            Console.WriteLine("注入成功");
+        }
+        static void Ejection()
+        {
+
+            if (injectionConfig != null)
+            {
+                try
+                {
+                    injector.UnloadAndCloseAssembly(injectionConfig, EjectMethod);
+                }
+                catch (ApplicationException ae)
+                {
+                    Console.WriteLine($"移除失败: {ae.Message}");
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"奇怪的错误: {ex.Message}");
+                    return;
+                }
+            }
+
+            Console.WriteLine("移除成功");
 
         }
     }

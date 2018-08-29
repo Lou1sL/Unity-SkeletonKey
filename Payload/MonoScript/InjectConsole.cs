@@ -1,21 +1,8 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-
-namespace InjectedConsole
+namespace Payload.MonoScript
 {
-    public class InjectionLoader
-    {
-        static GameObject gameObject;
-
-        public static void Inject()
-        {
-            gameObject = new GameObject();
-            gameObject.AddComponent<InjectConsole>();
-            Object.DontDestroyOnLoad(gameObject);
-        }
-    }
-    
     public class InjectConsole : MonoBehaviour
     {
         public bool Active = true;
@@ -32,7 +19,7 @@ namespace InjectedConsole
                 {
                     scrollPosition = new Vector2(0, System.Single.MaxValue - 1);
                     ConsoleString.Add("<size=18>" + TagString(condition, type) + " </size>" + "\n" + stackTrace + "\n");
-                    
+
                     if (ConsoleString.Count > 20)
                     {
                         ConsoleString.RemoveAt(0);

@@ -96,9 +96,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\InjectedConsole\InjectedConsole.csproj">
-      <Project>{3010a758-e65f-4ce5-86f4-33e982c363ac}</Project>
-      <Name>InjectedConsole</Name>
+    <ProjectReference Include="..\Payload\Payload.csproj">
+      <Project>{4838df1a-7ad6-4457-923a-e58f9e167463}</Project>
+      <Name>Payload</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
