@@ -12,12 +12,18 @@ namespace Payload
         public static void Inject()
         {
             gameObject = new GameObject();
-            gameObject.AddComponent<InjectConsole>();
+            gameObject.AddComponent<Console>();
+
+            gameObject.AddComponent<InjectAssetBundle>();
+            
+            Camera.main.gameObject.AddComponent<ColliderDrawer>();
+
             Object.DontDestroyOnLoad(gameObject);
         }
         public static void Eject()
         {
             Object.Destroy(gameObject);
+            Camera.main.gameObject.GetComponent<ColliderDrawer>().enabled = false;
         }
     }
 }

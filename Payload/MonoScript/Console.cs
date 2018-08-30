@@ -3,13 +3,13 @@ using UnityEngine;
 
 namespace Payload.MonoScript
 {
-    public class InjectConsole : MonoBehaviour
+    public class Console : MonoBehaviour
     {
-        public bool Active = true;
-        public KeyCode Switch = KeyCode.Home;
+        private bool Active = true;
+        private KeyCode Switch = KeyCode.Home;
         private Rect ConsoleRect = new Rect(Screen.width * 0.05f, Screen.height * 0.05f, Screen.width * 0.4f, Screen.height * 0.6f);
         private List<string> ConsoleString = new List<string>();
-        private Vector2 scrollPosition = new Vector2();
+        private Vector2 ScrollPosition = new Vector2();
 
 
         private void Start()
@@ -17,7 +17,7 @@ namespace Payload.MonoScript
             Application.logMessageReceived +=
                 (string condition, string stackTrace, LogType type) =>
                 {
-                    scrollPosition = new Vector2(0, System.Single.MaxValue - 1);
+                    ScrollPosition = new Vector2(0, System.Single.MaxValue - 1);
                     ConsoleString.Add("<size=18>" + TagString(condition, type) + " </size>" + "\n" + stackTrace + "\n");
 
                     if (ConsoleString.Count > 20)
@@ -31,7 +31,7 @@ namespace Payload.MonoScript
             if (!Active) return;
             GUILayout.Window(0, ConsoleRect, (id) =>
             {
-                scrollPosition = GUILayout.BeginScrollView(scrollPosition, GUILayout.Width(ConsoleRect.width), GUILayout.Height(ConsoleRect.height - 20));
+                ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, GUILayout.Width(ConsoleRect.width), GUILayout.Height(ConsoleRect.height - 20));
                 GUILayout.Label(GetConsoleString(), new GUIStyle(GUI.skin.label) { fontSize = 13 });
                 GUILayout.EndScrollView();
 
@@ -41,7 +41,7 @@ namespace Payload.MonoScript
                 if (GUILayout.Button("关闭(按HOME键开启)", GUILayout.Height(20), GUILayout.Width(ConsoleRect.width * 0.5f))) Active = false;
                 GUILayout.EndHorizontal();
 
-            }, "留白君的重定向控制台", new GUIStyle(GUI.skin.window) { fontSize = 18 });
+            }, "Unity Console", new GUIStyle(GUI.skin.window) { fontSize = 18 });
         }
         private void Update()
         {
