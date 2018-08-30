@@ -93,6 +93,7 @@ namespace MonoInjector
                 return;
             }
 
+            //TODO:fix overwrite
             Console.WriteLine("注入AssetBundle");
             DirectoryCopy(@".\InjectAssetBundle", Path.GetDirectoryName(target.Process.MainModule.FileName)+ @"\InjectAssetBundle", true);
 
@@ -120,6 +121,7 @@ namespace MonoInjector
                 }
             }
 
+            //TODO:delete asset bundle
             Console.WriteLine("移除成功");
 
         }
