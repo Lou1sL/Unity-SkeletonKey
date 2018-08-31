@@ -20,8 +20,6 @@ namespace MonoInjector
 
         public static MonoProcess[] GetProcesses()
         {
-            Console.WriteLine("寻找Unity进程中...");
-
             List<MonoProcess> procs = new List<MonoProcess>();
 
             foreach (Process p in Process.GetProcesses())
@@ -33,8 +31,6 @@ namespace MonoInjector
                     if ((baseAddress = GetMonoModule(p)) != IntPtr.Zero)
                     {
                         procs.Add(new MonoProcess(p, baseAddress));
-
-                        Console.WriteLine("找到: "+p.ProcessName);
                     }
                 }
                 catch (Win32Exception)

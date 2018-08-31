@@ -6,21 +6,30 @@ using UnityEngine;
 
 namespace Payload.MonoScript
 {
-    public class ColliderDrawer : MonoBehaviour
+    public class TriggerDrawer : MonoBehaviour
     {
-        private List<Collider> GetColliders()
+        private bool Active = true;
+
+        private KeyCode Switch = KeyCode.End;
+        private KeyCode DrawDistInc = KeyCode.PageUp;
+        private KeyCode DrawDistDec = KeyCode.PageDown;
+
+        private float DrawDistance = 100f;
+        private List<Collider> GetTriggers()
         {
             List<Collider> clist = new List<Collider>();
 
             GameObject[] allGameObjects = FindObjectsOfType<GameObject>();
 
-            foreach (var gameObject in allGameObjects)
+            foreach (var go in allGameObjects)
             {
-                Collider c = gameObject.GetComponent<Collider>();
-
-                if (c)
+                if (Vector3.Distance(go.transform.position, transform.position) <= DrawDistance)
                 {
-                    clist.Add(c);
+                    Collider c = go.GetComponent<Collider>();
+                    if (c && c.isTrigger)
+                    {
+                        clist.Add(c);
+                    }
                 }
             }
             return clist;
@@ -47,10 +56,6 @@ namespace Payload.MonoScript
         }
         private void DrawVertex(Vector3[] v)
         {
-            GL.Begin(GL.LINES);
-            lineMat.SetPass(0);
-            GL.Color(new Color(0f, 1f, 0f, 1f));
-
             //UP
             GL.Vertex3(v[0].x, v[0].y, v[0].z);
             GL.Vertex3(v[1].x, v[1].y, v[1].z);
@@ -89,26 +94,39 @@ namespace Payload.MonoScript
 
             GL.Vertex3(v[6].x, v[6].y, v[6].z);
             GL.Vertex3(v[4].x, v[4].y, v[4].z);
-
-
-            GL.End();
         }
 
         private Material lineMat;
 
-        private void Awake()
+        private void Start()
         {
-            //TODO:My not included in build
-            lineMat = new Material(Shader.Find("Particles/Alpha Blended Premultiply"));
+            //TODO:May not included in build
+            lineMat = new Material(Shader.Find("Hidden/Internal-Colored"));
+            lineMat.SetInt("_ZTest", (int)UnityEngine.Rendering.CompareFunction.Disabled);
         }
 
         void OnPostRender()
         {
-            foreach (Collider c in GetColliders())
+            if (!Active) return;
+
+            GL.Begin(GL.LINES);
+            lineMat.SetPass(0);
+            GL.Color(new Color(0f, 1f, 0f, 1f));
+
+            foreach (Collider c in GetTriggers())
             {
                 DrawVertex(GetColliderVertexPositions(c));
             }
+
+            GL.End();
         }
 
+        private void Update()
+        {
+            if (Input.GetKeyDown(Switch)) Active = !Active;
+            if (Input.GetKeyDown(DrawDistInc)) DrawDistance += 10f;
+            if (Input.GetKeyDown(DrawDistDec)) DrawDistance -= 10f;
+            if (DrawDistance < 0f) DrawDistance = 0f;
+        }
     }
 }

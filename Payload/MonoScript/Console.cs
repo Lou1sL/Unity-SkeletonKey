@@ -12,7 +12,7 @@ namespace Payload.MonoScript
         private Vector2 ScrollPosition = new Vector2();
 
 
-        private void Start()
+        private void Awake()
         {
             Application.logMessageReceived +=
                 (string condition, string stackTrace, LogType type) =>

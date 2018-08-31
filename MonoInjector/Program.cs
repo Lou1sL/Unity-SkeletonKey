@@ -16,57 +16,47 @@ namespace MonoInjector
         private static string EjectMethod = "Eject";
 
         private static Injector injector;
+        private static MonoProcess target;
         private static InjectionConfig injectionConfig;
 
         static void Main(string[] args)
         {
             Injection();
-            Console.WriteLine("按回车键移除");
-            Console.ReadLine();
-
             Ejection();
-            Console.WriteLine("按回车键退出");
-            Console.ReadLine();
+            Exit();
         }
 
         static void Injection()
         {
+            Console.WriteLine("Start Injection: Press ENTER");
+            Console.ReadLine();
+
+            Console.WriteLine("Finding Unity Game Process...");
+
             MonoProcess[] result = MonoProcess.GetProcesses();
 
             if (result.Length == 0)
-            {
-                Console.WriteLine("没找到Unity游戏进程");
+                Error("Unity Game Process Not Found!");
 
-                Console.WriteLine("按回车键退出");
-                Console.ReadLine();
-
-                Environment.Exit(0);
-            }
-
-            MonoProcess target = result[0];
+            target = result[0];
 
             if (target == null)
-            {
-                Console.WriteLine("奇怪的错误？");
-                return;
-            }
+                Error("target == NULL");
+
+
+            Console.WriteLine("Process Found: " + target.Process.ProcessName);
 
             target.Process.Refresh();
 
             if (target.Process.HasExited)
-            {
-                Console.WriteLine("游戏进程已结束");
-                return;
-            }
+                Error("Process Has Terminated!");
+
 
             if (injector == null || injector.ProcessHandle != target.Process.Handle)
                 injector = new Injector(target.Process.Handle);
 
             if (!Utils.ReadFile(DLLPath, out byte[] bytes))
-            {
-                Console.WriteLine("没找到注入的DLL");
-                return;
-            }
+                Error("Payload DLL Not Found!");
 
             injectionConfig = new InjectionConfig
             {
@@ -80,90 +70,58 @@ namespace MonoInjector
 
             try
             {
+                Console.WriteLine("Injecting Mono...");
                 injector.Inject(injectionConfig);
-            }
-            catch (ApplicationException ae)
-            {
-                Console.WriteLine($"注入失败: {ae.Message}");
-                return;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"奇怪的错误: {ex.Message} {ex.StackTrace}");
-                return;
+                Error($"Mono Injection Failed: {ex.Message} {ex.StackTrace}");
             }
+            
+            Console.WriteLine("Injecting AssetBundle...");
+            bool isABExist = Utils.DirOverWriteCopy(@".\InjectAssetBundle", Path.GetDirectoryName(target.Process.MainModule.FileName)+ @"\InjectAssetBundle");
+            if(!isABExist) Console.WriteLine("AssetBundle Injection Cancelled: AssetBundle Not Found!");
 
-            //TODO:fix overwrite
-            Console.WriteLine("注入AssetBundle");
-            DirectoryCopy(@".\InjectAssetBundle", Path.GetDirectoryName(target.Process.MainModule.FileName)+ @"\InjectAssetBundle", true);
-
-
-            Console.WriteLine("注入成功");
+            Console.WriteLine("INJECTION COMPLETED!");
         }
         static void Ejection()
         {
+            Console.WriteLine("Start Ejection: Press ENTER");
+            Console.ReadLine();
 
             if (injectionConfig != null)
             {
                 try
                 {
+                    Console.WriteLine("Ejecting Mono...");
                     injector.UnloadAndCloseAssembly(injectionConfig, EjectMethod);
-                }
-                catch (ApplicationException ae)
-                {
-                    Console.WriteLine($"移除失败: {ae.Message}");
-                    return;
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"奇怪的错误: {ex.Message}");
-                    return;
+                    Error($"Mono Ejection Failed: {ex.Message}");
                 }
             }
 
-            //TODO:delete asset bundle
-            Console.WriteLine("移除成功");
+            if (target != null)
+            {
+                bool isABExist = Utils.DirDel(Path.GetDirectoryName(target.Process.MainModule.FileName) + @"\InjectAssetBundle");
+                if (!isABExist) Console.WriteLine("AssetBundle Ejection Cancelled: AssetBundle Not Found!");
+            }
+
+            Console.WriteLine("EJECTION COMPLETED!");
 
         }
 
-
-
-        private static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs)
+        private static void Error(string errmsg)
         {
-            // Get the subdirectories for the specified directory.
-            DirectoryInfo dir = new DirectoryInfo(sourceDirName);
-
-            if (!dir.Exists)
-            {
-                throw new DirectoryNotFoundException(
-                    "Source directory does not exist or could not be found: "
-                    + sourceDirName);
-            }
-
-            DirectoryInfo[] dirs = dir.GetDirectories();
-            // If the destination directory doesn't exist, create it.
-            if (!Directory.Exists(destDirName))
-            {
-                Directory.CreateDirectory(destDirName);
-            }
-
-            // Get the files in the directory and copy them to the new location.
-            FileInfo[] files = dir.GetFiles();
-            foreach (FileInfo file in files)
-            {
-                string temppath = Path.Combine(destDirName, file.Name);
-                file.CopyTo(temppath, false);
-            }
-
-            // If copying subdirectories, copy them and their contents to new location.
-            if (copySubDirs)
-            {
-                foreach (DirectoryInfo subdir in dirs)
-                {
-                    string temppath = Path.Combine(destDirName, subdir.Name);
-                    DirectoryCopy(subdir.FullName, temppath, copySubDirs);
-                }
-            }
+            Console.WriteLine("ERROR: "+ errmsg);
+            Exit();
+        }
+        private static void Exit()
+        {
+            Console.WriteLine("Press ENTER to exit!");
+            Console.ReadLine();
+            Environment.Exit(0);
         }
     }
 }

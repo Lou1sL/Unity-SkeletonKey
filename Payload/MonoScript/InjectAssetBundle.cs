@@ -10,28 +10,24 @@ namespace Payload.MonoScript
 {
     public class InjectAssetBundle : MonoBehaviour
     {
-        public static AssetBundle InjectedAssetBundle = null;
+        public static AssetBundle InjectedScene = null;
+        public static AssetBundle InjectedAsset = null;
 
-        void Awake()
+        void Start()
         {
-            InjectedAssetBundle = AssetBundle.LoadFromFile(@"./InjectAssetBundle/");
-            if (InjectedAssetBundle == null)
-            {
-                Debug.LogError("Injector:Failed to inject AssetBundle!");
-            }
-            else
-            {
-                Debug.Log("Injector:Inject AssetBundle Succeed!");
-            }
-
-            string[] scenePaths = InjectedAssetBundle.GetAllScenePaths();
+            //InjectedAssetBundle = AssetBundle.LoadFromFile(@".\InjectAssetBundle\InjectAssetBundle");
+            //InjectedAsset = AssetBundle.LoadFromFile(@".\InjectAssetBundle\inject_asset");
+            InjectedScene = AssetBundle.LoadFromFile(@".\InjectAssetBundle\inject_scene");
+            
+            string[] scenePaths = InjectedScene.GetAllScenePaths();
+            
             string sceneName = Path.GetFileNameWithoutExtension(scenePaths[0]);
             SceneManager.LoadScene(sceneName);
         }
 
         private void OnDestroy()
         {
-            InjectedAssetBundle.Unload(true);
+            InjectedScene.Unload(true);
         }
     }
 }
