@@ -65,6 +65,7 @@
   <ItemGroup>
     <Compile Include="Main.cs" />
     <Compile Include="MonoScript\FreeMainCamera.cs" />
+    <Compile Include="MonoScript\Statistic.cs" />
     <Compile Include="MonoScript\TriggerDrawer.cs" />
     <Compile Include="MonoScript\Console.cs" />
     <Compile Include="MonoScript\InjectAssetBundle.cs" />

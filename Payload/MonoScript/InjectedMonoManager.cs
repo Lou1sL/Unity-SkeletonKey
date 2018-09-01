@@ -11,6 +11,7 @@ namespace Payload.MonoScript
         private void Awake()
         {
             gameObject.AddComponent<Console>();
+            gameObject.AddComponent<Statistic>();
             //gameObject.AddComponent<InjectAssetBundle>();
         }
 

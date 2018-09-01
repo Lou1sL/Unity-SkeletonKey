@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,24 +11,32 @@ namespace Payload.MonoScript
 {
     public class InjectAssetBundle : MonoBehaviour
     {
-        public static AssetBundle InjectedScene = null;
-        public static AssetBundle InjectedAsset = null;
+        private static AssetBundle InjectedScene = null;
+        private static AssetBundle InjectedAsset = null;
 
         void Start()
         {
-            //InjectedAssetBundle = AssetBundle.LoadFromFile(@".\InjectAssetBundle\InjectAssetBundle");
-            //InjectedAsset = AssetBundle.LoadFromFile(@".\InjectAssetBundle\inject_asset");
-            InjectedScene = AssetBundle.LoadFromFile(@".\InjectAssetBundle\inject_scene");
-            
-            string[] scenePaths = InjectedScene.GetAllScenePaths();
-            
-            string sceneName = Path.GetFileNameWithoutExtension(scenePaths[0]);
-            SceneManager.LoadScene(sceneName);
+            Debug.Log("AssetBundle Injection Will Be Started In 5 Sec!");
+            Invoke("InitAsset", 5f);
         }
 
         private void OnDestroy()
         {
             InjectedScene.Unload(true);
+        }
+
+
+        private void InitAsset()
+        {
+            //InjectedAssetBundle = AssetBundle.LoadFromFile(@".\InjectAssetBundle\InjectAssetBundle");
+            InjectedAsset = AssetBundle.LoadFromFile(@".\InjectAssetBundle\inject_asset");
+            InjectedScene = AssetBundle.LoadFromFile(@".\InjectAssetBundle\inject_scene");
+
+            string[] scenePaths = InjectedScene.GetAllScenePaths();
+
+            string sceneName = Path.GetFileNameWithoutExtension(scenePaths[0]);
+            Debug.Log("Load scene:" + sceneName);
+            SceneManager.LoadScene(sceneName);
         }
     }
 }

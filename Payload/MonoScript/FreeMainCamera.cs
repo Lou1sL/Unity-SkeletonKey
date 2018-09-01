@@ -44,9 +44,10 @@ namespace Payload.MonoScript
             if (!target)
             {
                 GameObject go = new GameObject("Cam Target");
-                go.transform.position = transform.position + (transform.forward * distance);
                 target = go.transform;
             }
+
+            target.position = transform.position + (transform.forward * distance);
 
             distance = Vector3.Distance(transform.position, target.position);
             currentDistance = distance;

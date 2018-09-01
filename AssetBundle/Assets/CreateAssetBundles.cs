@@ -8,8 +8,10 @@ public class CreateAssetBundles
     [MenuItem("Assets/Build AssetBundles")]
     static void BuildAllAssetBundles()
     {
-        BuildPipeline.BuildAssetBundles("../Build/x86/InjectAssetBundle", BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows);
-        BuildPipeline.BuildAssetBundles("../Build/x64/InjectAssetBundle", BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows64);
+        BuildPipeline.BuildAssetBundles(@"../Build/x86/InjectAssetBundle", BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows);
+        BuildPipeline.BuildAssetBundles(@"../Build/x64/InjectAssetBundle", BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows64);
+
+        //BuildPipeline.BuildAssetBundles(@"Assets/StreamingAssets/InjectAssetBundle", BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows64);
     }
 }
 

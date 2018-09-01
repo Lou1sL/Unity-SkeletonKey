@@ -78,10 +78,12 @@ namespace MonoInjector
                 Error($"Mono Injection Failed: {ex.Message} {ex.StackTrace}");
             }
             
-            Console.WriteLine("Injecting AssetBundle...");
+            Console.WriteLine("Copying AssetBundle...");
             bool isABExist = Utils.DirOverWriteCopy(@".\InjectAssetBundle", Path.GetDirectoryName(target.Process.MainModule.FileName)+ @"\InjectAssetBundle");
             if(!isABExist) Console.WriteLine("AssetBundle Injection Cancelled: AssetBundle Not Found!");
 
+            Console.WriteLine("AssetBundle Copied to:"+ Path.GetDirectoryName(target.Process.MainModule.FileName) + @"\InjectAssetBundle");
+            Console.WriteLine("AssetBundle Injection Will Be Started In 5 Sec!");
             Console.WriteLine("INJECTION COMPLETED!");
         }
         static void Ejection()
