@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Payload.MonoScript
 {
@@ -22,11 +18,9 @@ namespace Payload.MonoScript
             if (!Camera.main.gameObject.GetComponent<FreeMainCamera>())
                 Camera.main.gameObject.AddComponent<FreeMainCamera>();
 
-            foreach (Camera c in Camera.allCameras)
-            {
-                if (!c.gameObject.GetComponent<TriggerDrawer>())
-                    c.gameObject.AddComponent<TriggerDrawer>();
-            }
+
+            if (!Camera.main.gameObject.GetComponent<TriggerDrawer>())
+                Camera.main.gameObject.AddComponent<TriggerDrawer>();
 
             Invoke("RefreshCamScript", 3f);
         }

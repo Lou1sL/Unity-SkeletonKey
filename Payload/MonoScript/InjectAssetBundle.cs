@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace Payload.MonoScript
 {
@@ -36,7 +35,7 @@ namespace Payload.MonoScript
 
             string sceneName = Path.GetFileNameWithoutExtension(scenePaths[0]);
             Debug.Log("Load scene:" + sceneName);
-            SceneManager.LoadScene(sceneName);
+            //SceneManager.LoadScene(sceneName);
         }
     }
 }

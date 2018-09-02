@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using UnityEngine.SceneManagement;
+//using UnityEngine.SceneManagement;
 
 namespace Payload.MonoScript
 {
@@ -22,7 +22,7 @@ namespace Payload.MonoScript
             string str = "Game Statistics:\n(Unity Ver: " + Application.unityVersion + ")\n\n";
 
             str += "FPS: " + Rnd((1.0f / Time.deltaTime)) + "\n";
-            str += "Current Scene: " + SceneManager.GetActiveScene().name + "\n";
+            //str += "Current Scene: " + SceneManager.GetActiveScene().name + "\n";
             str += "Main Camera: " + Camera.main.name + "\n";
             str += "    Position:" + Vec2Str(Camera.main.transform.position) + "\n";
             str += "    EularAng:" + Vec2Str(Camera.main.transform.eulerAngles) + "\n";
