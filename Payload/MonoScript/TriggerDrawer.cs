@@ -8,33 +8,17 @@ namespace Payload.MonoScript
 {
     public class TriggerDrawer : MonoBehaviour
     {
-        private bool Active = true;
+        private static bool Active = true;
 
-        private KeyCode Switch = KeyCode.End;
-        private KeyCode DrawDistInc = KeyCode.PageUp;
-        private KeyCode DrawDistDec = KeyCode.PageDown;
+        private static KeyCode Switch = KeyCode.End;
+        private static KeyCode DrawDistInc = KeyCode.PageUp;
+        private static KeyCode DrawDistDec = KeyCode.PageDown;
 
-        private float DrawDistance = 100f;
-        private List<Collider> GetTriggers()
-        {
-            List<Collider> clist = new List<Collider>();
+        private static float DrawDistance = 100f;
+        private static HashSet<Collider> TriggerList = new HashSet<Collider>();
 
-            GameObject[] allGameObjects = FindObjectsOfType<GameObject>();
 
-            foreach (var go in allGameObjects)
-            {
-                if (Vector3.Distance(go.transform.position, transform.position) <= DrawDistance)
-                {
-                    Collider c = go.GetComponent<Collider>();
-                    if (c && c.isTrigger)
-                    {
-                        clist.Add(c);
-                    }
-                }
-            }
-            return clist;
-        }
-        private Vector3[] GetColliderVertexPositions(Collider c)
+        private static Vector3[] GetColliderVertexPositions(Collider c)
         {
             var vertices = new Vector3[8];
             var thisMatrix = c.transform.localToWorldMatrix;
@@ -54,7 +38,7 @@ namespace Payload.MonoScript
             c.transform.rotation = storedRotation;
             return vertices;
         }
-        private void DrawVertex(Vector3[] v)
+        private static void DrawVertex(Vector3[] v)
         {
             //UP
             GL.Vertex3(v[0].x, v[0].y, v[0].z);
@@ -96,13 +80,15 @@ namespace Payload.MonoScript
             GL.Vertex3(v[4].x, v[4].y, v[4].z);
         }
 
-        private Material lineMat;
+        private static Material lineMat;
 
         private void Start()
         {
             //TODO:May not included in build
             lineMat = new Material(Shader.Find("Hidden/Internal-Colored"));
             lineMat.SetInt("_ZTest", (int)UnityEngine.Rendering.CompareFunction.Disabled);
+            
+            RefreshTriggerList();
         }
 
         void OnPostRender()
@@ -113,7 +99,7 @@ namespace Payload.MonoScript
             lineMat.SetPass(0);
             GL.Color(new Color(0f, 1f, 0f, 1f));
 
-            foreach (Collider c in GetTriggers())
+            foreach (Collider c in TriggerList)
             {
                 DrawVertex(GetColliderVertexPositions(c));
             }
@@ -123,10 +109,52 @@ namespace Payload.MonoScript
 
         private void Update()
         {
-            if (Input.GetKeyDown(Switch)) Active = !Active;
-            if (Input.GetKeyDown(DrawDistInc)) DrawDistance += 10f;
-            if (Input.GetKeyDown(DrawDistDec)) DrawDistance -= 10f;
+            if (Input.GetKeyDown(Switch))
+            {
+                Active = !Active;
+                RefreshTriggerList();
+            }
+            if (Input.GetKeyDown(DrawDistInc))
+            {
+                DrawDistance += 10f;
+                RefreshTriggerList();
+            }
+            if (Input.GetKeyDown(DrawDistDec))
+            {
+                DrawDistance -= 10f;
+                RefreshTriggerList();
+            }
             if (DrawDistance < 0f) DrawDistance = 0f;
+        }
+
+
+        private void RefreshTriggerList()
+        {
+            CancelInvoke();
+
+            if (Active)
+            {
+                GameObject[] allGameObjects = FindObjectsOfType<GameObject>();
+
+                foreach (var go in allGameObjects)
+                {
+                    Collider c = go.GetComponent<Collider>();
+
+                    if (Vector3.Distance(go.transform.position, transform.position) <= DrawDistance)
+                    {
+                        if (c && c.isTrigger)
+                        {
+                            TriggerList.Add(c);
+                        }
+                    }
+                    else if (TriggerList.Contains(c))
+                    {
+                        TriggerList.Remove(c);
+                    }
+                }
+            }
+
+            Invoke("RefreshTriggerList", 0.5f);
         }
     }
 }

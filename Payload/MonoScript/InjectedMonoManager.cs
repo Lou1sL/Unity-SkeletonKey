@@ -13,22 +13,22 @@ namespace Payload.MonoScript
             gameObject.AddComponent<Console>();
             gameObject.AddComponent<Statistic>();
             //gameObject.AddComponent<InjectAssetBundle>();
+
+            RefreshCamScript();
         }
 
-        private void Update()
+        private void RefreshCamScript()
         {
-            if(!Camera.main.gameObject.GetComponent<TriggerDrawer>())
-                Camera.main.gameObject.AddComponent<TriggerDrawer>();
-
             if (!Camera.main.gameObject.GetComponent<FreeMainCamera>())
                 Camera.main.gameObject.AddComponent<FreeMainCamera>();
-        }
 
-        private void OnDestroy()
-        {
-            //Destroy(Camera.main.gameObject.GetComponent<TriggerDrawer>());
-            Camera.main.gameObject.GetComponent<TriggerDrawer>().enabled = false;
-            Camera.main.gameObject.GetComponent<FreeMainCamera>().enabled = false;
+            foreach (Camera c in Camera.allCameras)
+            {
+                if (!c.gameObject.GetComponent<TriggerDrawer>())
+                    c.gameObject.AddComponent<TriggerDrawer>();
+            }
+
+            Invoke("RefreshCamScript", 3f);
         }
     }
 }

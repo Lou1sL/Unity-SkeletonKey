@@ -18,7 +18,9 @@ namespace Payload
         }
         public static void Eject()
         {
-            Object.Destroy(gameObject);
+            //Since this function is easily broken...
+            //I'll leave it.
+            //Object.Destroy(gameObject);
         }
     }
 }

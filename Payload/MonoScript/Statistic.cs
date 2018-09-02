@@ -19,9 +19,13 @@ namespace Payload.MonoScript
         {
             if (!Active) return;
 
-            string str = "Game Statistics (Unity Ver: " + Application.unityVersion + " )\n\n";
+            string str = "Game Statistics:\n(Unity Ver: " + Application.unityVersion + ")\n\n";
 
-            str += "Current Scene:" + SceneManager.GetActiveScene().name + "\n";
+            str += "FPS: " + Rnd((1.0f / Time.deltaTime)) + "\n";
+            str += "Current Scene: " + SceneManager.GetActiveScene().name + "\n";
+            str += "Main Camera: " + Camera.main.name + "\n";
+            str += "    Position:" + Vec2Str(Camera.main.transform.position) + "\n";
+            str += "    EularAng:" + Vec2Str(Camera.main.transform.eulerAngles) + "\n";
 
 
             GUI.Label(LabelRect, str, new GUIStyle(GUI.skin.label) { fontSize = 13 });
@@ -32,5 +36,15 @@ namespace Payload.MonoScript
             if (Input.GetKeyDown(Switch)) Active = !Active;
         }
 
+
+        private static string Vec2Str(Vector3 v3)
+        {
+            return " X:" + Rnd(v3.x) + " Y:" + Rnd(v3.y) + " Z:" + Rnd(v3.z);
+        }
+        private static string Rnd(float f)
+        {
+            return f.ToString("F2");
+        }
     }
+
 }
