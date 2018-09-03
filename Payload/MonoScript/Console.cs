@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 namespace Payload.MonoScript
@@ -9,7 +10,7 @@ namespace Payload.MonoScript
         private KeyCode Switch = KeyCode.Home;
 
         private Rect ConsoleRect = new Rect(Screen.width * 0.05f, Screen.height * 0.05f, Screen.width * 0.4f, Screen.height * 0.6f);
-
+        
         private List<string> ConsoleString = new List<string>();
         private Vector2 ScrollPosition = new Vector2();
 
@@ -20,12 +21,14 @@ namespace Payload.MonoScript
                 (string condition, string stackTrace, LogType type) =>
                 {
                     ScrollPosition = new Vector2(0, System.Single.MaxValue - 1);
-                    ConsoleString.Add("<size=18>" + TagString(condition, type) + " </size>" + "\n" + stackTrace + "\n");
+                    ConsoleString.Add("<size=15>" + TagString(condition, type) + " </size>" + "\n" + stackTrace + "\n");
 
                     if (ConsoleString.Count > 20)
                     {
                         ConsoleString.RemoveAt(0);
                     }
+
+                    File.AppendAllText(@".\UnityConsoleInjected.log", "[" + System.DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss.fff") + "] " + type.ToString() + ": " + condition + "\r\n" + (stackTrace != string.Empty ? stackTrace + "\r\n" : string.Empty));
                 };
         }
         private void OnGUI()
@@ -61,11 +64,11 @@ namespace Payload.MonoScript
             string ColorTag = string.Empty;
             switch (type)
             {
-                case LogType.Log: ColorTag = "<color=lightblue>"; break;
-                case LogType.Warning: ColorTag = "<color=yellow>"; break;
-                case LogType.Error: ColorTag = "<color=red>"; break;
-                case LogType.Exception: ColorTag = "<color=brown>"; break;
-                case LogType.Assert: ColorTag = "<color=magenta>"; break;
+                case LogType.Log: ColorTag = "<color=white>Log: "; break;
+                case LogType.Warning: ColorTag = "<color=yellow>Warning: "; break;
+                case LogType.Error: ColorTag = "<color=red>Error: "; break;
+                case LogType.Exception: ColorTag = "<color=red>Exception: "; break;
+                case LogType.Assert: ColorTag = "<color=magenta>Assert: "; break;
             }
             string ColorTagEnd = " </color>";
 

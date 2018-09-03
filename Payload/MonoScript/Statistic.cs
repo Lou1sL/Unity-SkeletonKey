@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
+﻿using UnityEngine;
+//SceneManagement feture implemented after Unity 5.3(include)
 //using UnityEngine.SceneManagement;
 
 namespace Payload.MonoScript
@@ -22,7 +19,10 @@ namespace Payload.MonoScript
             string str = "Game Statistics:\n(Unity Ver: " + Application.unityVersion + ")\n\n";
 
             str += "FPS: " + Rnd((1.0f / Time.deltaTime)) + "\n";
+            //After Unity 5.3(include)
             //str += "Current Scene: " + SceneManager.GetActiveScene().name + "\n";
+            //Before Unity 5.3
+            str += "Current Scene: " + Application.loadedLevelName + "\n";
             str += "Main Camera: " + Camera.main.name + "\n";
             str += "    Position:" + Vec2Str(Camera.main.transform.position) + "\n";
             str += "    EularAng:" + Vec2Str(Camera.main.transform.eulerAngles) + "\n";
