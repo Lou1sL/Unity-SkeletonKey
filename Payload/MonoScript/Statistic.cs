@@ -27,7 +27,7 @@ namespace Payload.MonoScript
             str += "    Position:" + Vec2Str(Camera.main.transform.position) + "\n";
             str += "    EularAng:" + Vec2Str(Camera.main.transform.eulerAngles) + "\n";
 
-
+            //Trying to do something today,but did nothing :(
             GUI.Label(LabelRect, str, new GUIStyle(GUI.skin.label) { fontSize = 13 });
         }
 
