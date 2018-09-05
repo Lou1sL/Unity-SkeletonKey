@@ -9,7 +9,7 @@ namespace Payload.MonoScript
         private bool Active = true;
         private KeyCode Switch = KeyCode.Home;
 
-        private Rect ConsoleRect = new Rect(Screen.width * 0.05f, Screen.height * 0.05f, Screen.width * 0.4f, Screen.height * 0.6f);
+        private Rect ConsoleRect = new Rect(Screen.width * 0.35f, Screen.height * 0.65f, Screen.width * 0.6f, Screen.height * 0.3f);
         
         private List<string> ConsoleString = new List<string>();
         private Vector2 ScrollPosition = new Vector2();

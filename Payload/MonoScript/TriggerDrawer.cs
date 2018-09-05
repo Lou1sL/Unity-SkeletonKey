@@ -11,9 +11,14 @@ namespace Payload.MonoScript
         private KeyCode DrawDistInc = KeyCode.PageUp;
         private KeyCode DrawDistDec = KeyCode.PageDown;
 
+        private Rect HierRect = new Rect(Screen.width * 0.02f, Screen.height * 0.02f, Screen.width * 0.3f, Screen.height*0.9f);
+        private Vector2 ScrollPosition = new Vector2();
+
+
         private float DrawDistance = 100f;
-        private HashSet<Collider> TriggerList = new HashSet<Collider>();
-        private HashSet<Collider2D> Trigger2DList = new HashSet<Collider2D>();
+
+        private HashSet<Collider> TriggerHashSet = new HashSet<Collider>();
+        private HashSet<Collider2D> Trigger2DHashSet = new HashSet<Collider2D>();
 
         private Vector3[] GetColliderVertexPositions(Collider c)
         {
@@ -55,6 +60,7 @@ namespace Payload.MonoScript
             c2d.transform.rotation = storedRotation;
             return vertices;
         }
+
         private void DrawVertex(Vector3[] v)
         {
             //UP
@@ -146,7 +152,7 @@ namespace Payload.MonoScript
             lineMat = new Material(Shader.Find("Hidden/Internal-Colored"));
             lineMat.SetInt("_ZTest", (int)UnityEngine.Rendering.CompareFunction.Disabled);
             
-            RefreshTriggerList();
+            RefreshTriggerHashSet();
         }
 
         void OnPostRender()
@@ -158,22 +164,22 @@ namespace Payload.MonoScript
             GL.Color(new Color(0f, 1f, 0f, 1f));
 
 
-            foreach (Collider c in TriggerList)
+            foreach (Collider c in TriggerHashSet)
             {
                 if (c) DrawVertex(GetColliderVertexPositions(c));
                 else
                 {
-                    TriggerList.Remove(c);
+                    TriggerHashSet.Remove(c);
                     break;
                 }
             }
 
-            foreach (Collider2D c in Trigger2DList)
+            foreach (Collider2D c in Trigger2DHashSet)
             {
                 if (c) DrawVertex2D(GetCollider2DVertexPositions(c));
                 else
                 {
-                    Trigger2DList.Remove(c);
+                    Trigger2DHashSet.Remove(c);
                     break;
                 }
             }
@@ -186,31 +192,29 @@ namespace Payload.MonoScript
             if (Input.GetKeyDown(Switch))
             {
                 Active = !Active;
-                RefreshTriggerList();
+                RefreshTriggerHashSet();
             }
             if (Input.GetKeyDown(DrawDistInc))
             {
                 DrawDistance += 10f;
-                RefreshTriggerList();
+                RefreshTriggerHashSet();
             }
             if (Input.GetKeyDown(DrawDistDec))
             {
                 DrawDistance -= 10f;
-                RefreshTriggerList();
+                RefreshTriggerHashSet();
             }
             if (DrawDistance < 0f) DrawDistance = 0f;
         }
 
 
-        private void RefreshTriggerList()
+        private void RefreshTriggerHashSet()
         {
             CancelInvoke();
 
             if (Active)
             {
-                GameObject[] allGameObjects = FindObjectsOfType<GameObject>();
-
-                foreach (var go in allGameObjects)
+                foreach (var go in FindObjectsOfType<GameObject>())
                 {
                     Collider c = go.GetComponent<Collider>();
 
@@ -220,12 +224,12 @@ namespace Payload.MonoScript
                         {
                             if (c && c.isTrigger)
                             {
-                                TriggerList.Add(c);
+                                TriggerHashSet.Add(c);
                             }
                         }
-                        else if (TriggerList.Contains(c))
+                        else if (TriggerHashSet.Contains(c))
                         {
-                            TriggerList.Remove(c);
+                            TriggerHashSet.Remove(c);
                         }
                     }
 
@@ -237,19 +241,80 @@ namespace Payload.MonoScript
                         {
                             if (c2d && c2d.isTrigger)
                             {
-                                Trigger2DList.Add(c2d);
+                                Trigger2DHashSet.Add(c2d);
                             }
                         }
-                        else if (Trigger2DList.Contains(c2d))
+                        else if (Trigger2DHashSet.Contains(c2d))
                         {
-                            Trigger2DList.Remove(c2d);
+                            Trigger2DHashSet.Remove(c2d);
                         }
 
                     }
                 }
             }
 
-            Invoke("RefreshTriggerList", 2f);
+            Invoke("RefreshTriggerHashSet", 2f);
+        }
+
+        public static string GetGameObjectPath(GameObject obj)
+        {
+            string path = "/" + obj.name;
+            while (obj.transform.parent != null)
+            {
+                obj = obj.transform.parent.gameObject;
+                path = "/" + obj.name + path;
+            }
+            return path;
+        }
+
+        private void OnGUI()
+        {
+            if (!Active) return;
+
+            GUI.Label(new Rect(Input.mousePosition.x, Screen.height - Input.mousePosition.y, Screen.width, Screen.height),"<color=#00FF00>"+AimingObjName+"</color>");
+
+            GUILayout.Window(1, HierRect, (id) =>
+            {
+                ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, GUILayout.Width(HierRect.width), GUILayout.Height(HierRect.height));
+                foreach (Collider t in TriggerHashSet)
+                {
+                    GUILayout.Label(GetGameObjectPath(t.gameObject), new GUIStyle(GUI.skin.label) { fontSize = 13 });
+                }
+                foreach (Collider2D t2d in Trigger2DHashSet)
+                {
+                    GUILayout.Label(GetGameObjectPath(t2d.gameObject), new GUIStyle(GUI.skin.label) { fontSize = 13 });
+                }
+                GUILayout.EndScrollView();
+            }, "Trigger Hierarchy", new GUIStyle(GUI.skin.window) { fontSize = 18 });
+        }
+        
+        private string AimingObjName = string.Empty;
+        private void FixedUpdate()
+        {
+            AimingObjName = string.Empty;
+            if (!Active) return;
+
+            RaycastHit[] hits = Physics.RaycastAll(Camera.main.ScreenPointToRay(Input.mousePosition),DrawDistance);
+
+            foreach(RaycastHit hit in hits)
+            {
+                if (hit.collider.isTrigger)
+                {
+                    AimingObjName += GetGameObjectPath(hit.transform.gameObject)+"\n";
+                }
+            }
+            
+
+            RaycastHit2D[] hit2ds = Physics2D.RaycastAll(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
+            
+            foreach(RaycastHit2D hit2d in hit2ds)
+            {
+                if (hit2d && hit2d.collider.isTrigger)
+                {
+                    AimingObjName += GetGameObjectPath(hit2d.transform.gameObject) + "\n";
+                }
+            }
+            
         }
     }
 }

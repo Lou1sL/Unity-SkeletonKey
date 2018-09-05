@@ -10,7 +10,7 @@ namespace Payload.MonoScript
         private bool Active = true;
         private KeyCode Switch = KeyCode.Delete;
 
-        private Rect LabelRect = new Rect(Screen.width * 0.7f, Screen.height * 0.75f, Screen.width * 0.3f, Screen.height * 0.25f);
+        private Rect LabelRect = new Rect(Screen.width * 0.75f, Screen.height * 0.02f, Screen.width * 0.25f, Screen.height * 0.48f);
 
         private void OnGUI()
         {
