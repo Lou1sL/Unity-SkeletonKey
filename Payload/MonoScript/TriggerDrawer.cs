@@ -256,17 +256,6 @@ namespace Payload.MonoScript
             Invoke("RefreshTriggerHashSet", 2f);
         }
 
-        public static string GetGameObjectPath(GameObject obj)
-        {
-            string path = "/" + obj.name;
-            while (obj.transform.parent != null)
-            {
-                obj = obj.transform.parent.gameObject;
-                path = "/" + obj.name + path;
-            }
-            return path;
-        }
-
         private void OnGUI()
         {
             if (!Active) return;
@@ -294,20 +283,21 @@ namespace Payload.MonoScript
             AimingObjName = string.Empty;
             if (!Active) return;
 
-            RaycastHit[] hits = Physics.RaycastAll(Camera.main.ScreenPointToRay(Input.mousePosition),DrawDistance);
-
-            foreach(RaycastHit hit in hits)
+            RaycastHit[] hits = Physics.RaycastAll(Camera.main.ScreenPointToRay(Input.mousePosition), DrawDistance);
+            foreach (RaycastHit hit in hits)
             {
                 if (hit.collider.isTrigger)
                 {
                     AimingObjName += GetGameObjectPath(hit.transform.gameObject)+"\n";
                 }
             }
-            
 
-            RaycastHit2D[] hit2ds = Physics2D.RaycastAll(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
+
+            RaycastHit2D[] hit2ds = new RaycastHit2D[0];
             
-            foreach(RaycastHit2D hit2d in hit2ds)
+            if (Camera.main.orthographic) hit2ds = Physics2D.RaycastAll(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
+            else hit2ds = Physics2D.RaycastAll(ScreenToWorldPointPerspective(Input.mousePosition), Vector2.zero);
+            foreach (RaycastHit2D hit2d in hit2ds)
             {
                 if (hit2d && hit2d.collider.isTrigger)
                 {
@@ -316,5 +306,43 @@ namespace Payload.MonoScript
             }
             
         }
+
+
+
+
+        public static string GetGameObjectPath(GameObject obj)
+        {
+            string path = "/" + obj.name;
+            while (obj.transform.parent != null)
+            {
+                obj = obj.transform.parent.gameObject;
+                path = "/" + obj.name + path;
+            }
+            return path;
+        }
+        public static Matrix4x4 ScreenToWorldMatrix(Camera cam)
+        {
+            // Make a matrix that converts from
+            // screen coordinates to clip coordinates.
+            var rect = cam.pixelRect;
+            var viewportMatrix = Matrix4x4.Ortho(rect.xMin, rect.xMax, rect.yMin, rect.yMax, -1, 1);
+
+            // The camera's view-projection matrix converts from world coordinates to clip coordinates.
+            var vpMatrix = cam.projectionMatrix * cam.worldToCameraMatrix;
+
+            // Setting column 2 (z-axis) to identity makes the matrix ignore the z-axis.
+            // Instead you get the value on the xy plane!
+            vpMatrix.SetColumn(2, new Vector4(0, 0, 1, 0));
+
+            // Going from right to left:
+            // convert screen coords to clip coords, then clip coords to world coords.
+            return vpMatrix.inverse * viewportMatrix;
+        }
+        public static Vector2 ScreenToWorldPointPerspective(Vector2 point)
+        {
+            return ScreenToWorldMatrix(Camera.main).MultiplyPoint(point);
+        }
+
+
     }
 }
