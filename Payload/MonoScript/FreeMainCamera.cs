@@ -77,7 +77,7 @@ namespace Payload.MonoScript
                 ////////OrbitAngle
 
                 //Clamp the vertical axis for the orbit
-                yDeg = ClampAngle(yDeg, yMinLimit, yMaxLimit);
+                yDeg = Utils.ClampAngle(yDeg, yMinLimit, yMaxLimit);
                 // set camera rotation 
                 desiredRotation = Quaternion.Euler(yDeg, xDeg, 0);
                 currentRotation = transform.rotation;
@@ -108,14 +108,7 @@ namespace Payload.MonoScript
             transform.position = position;
         }
 
-        private static float ClampAngle(float angle, float min, float max)
-        {
-            if (angle < -360)
-                angle += 360;
-            if (angle > 360)
-                angle -= 360;
-            return Mathf.Clamp(angle, min, max);
-        }
+        
 
 
         private void Update()

@@ -66,8 +66,10 @@ namespace MonoInjector
                     Native.GetModuleFileNameEx(
                         process.Handle, modulePointers[i], path, 260);
 
-                    //TODO:In the Experimental .NET 4.6 supported Unity.mono.dll is called mono-2.0-bdwgc.dll
-                    if (path.ToString().EndsWith("mono.dll", StringComparison.OrdinalIgnoreCase))
+                    //In the .NET 4.6 supported Unity.mono.dll is called mono-2.0-bdwgc.dll
+                    bool IsMonoDll = path.ToString().EndsWith("mono.dll", StringComparison.OrdinalIgnoreCase) ||
+                        path.ToString().EndsWith("mono-2.0-bdwgc.dll", StringComparison.OrdinalIgnoreCase);
+                    if (IsMonoDll)
                     {
                         Native.GetModuleInformation(process.Handle, modulePointers[i], out MODULEINFO info, (uint)(size * modulePointers.Length));
                         return info.lpBaseOfDll;

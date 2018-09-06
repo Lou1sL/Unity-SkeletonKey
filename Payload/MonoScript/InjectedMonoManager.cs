@@ -8,6 +8,7 @@ namespace Payload.MonoScript
         {
             gameObject.AddComponent<Console>();
             gameObject.AddComponent<Statistic>();
+            gameObject.AddComponent<TransformMover>();
             //gameObject.AddComponent<InjectAssetBundle>();
 
             RefreshCamScript();

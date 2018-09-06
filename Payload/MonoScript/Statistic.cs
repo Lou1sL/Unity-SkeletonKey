@@ -18,14 +18,14 @@ namespace Payload.MonoScript
 
             string str = "Game Statistics:\n(Unity Ver: " + Application.unityVersion + ")\n\n";
 
-            str += "FPS: " + Rnd((1.0f / Time.deltaTime)) + "\n";
+            str += "FPS: " + Utils.Rnd((1.0f / Time.deltaTime)) + "\n";
             //After Unity 5.3(include)
             //str += "Current Scene: " + SceneManager.GetActiveScene().name + "\n";
             //Before Unity 5.3
             str += "Current Scene: " + Application.loadedLevelName + "\n";
-            str += "Main Camera: " + Camera.main.name + "\n";
-            str += "    Position:" + Vec2Str(Camera.main.transform.position) + "\n";
-            str += "    EularAng:" + Vec2Str(Camera.main.transform.eulerAngles) + "\n";
+            str += "Main Camera: " + Utils.GetGameObjectPath(Camera.main.gameObject) + "\n";
+            str += "    Position:" + Utils.Vec2Str(Camera.main.transform.position) + "\n";
+            str += "    EularAng:" + Utils.Vec2Str(Camera.main.transform.eulerAngles) + "\n";
 
             //Trying to do something today,but did nothing :(
             GUI.Label(LabelRect, str, new GUIStyle(GUI.skin.label) { fontSize = 13 });
@@ -37,14 +37,7 @@ namespace Payload.MonoScript
         }
 
 
-        private static string Vec2Str(Vector3 v3)
-        {
-            return " X:" + Rnd(v3.x) + " Y:" + Rnd(v3.y) + " Z:" + Rnd(v3.z);
-        }
-        private static string Rnd(float f)
-        {
-            return f.ToString("F2");
-        }
+        
     }
 
 }
