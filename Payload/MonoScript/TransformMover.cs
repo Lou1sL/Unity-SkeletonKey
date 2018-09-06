@@ -11,11 +11,13 @@ namespace Payload.MonoScript
         private bool Active = false;
 
         private KeyCode Switch = KeyCode.ScrollLock;
+        private KeyCode MvSpdInc = KeyCode.PageUp;
+        private KeyCode MvSpdDec = KeyCode.PageDown;
+
+        private float MvSpd = 100f;
 
         private Transform MovingTransform;
-        private Vector3 Distance = new Vector3();
-
-
+        
         private void Update()
         {
             if (Input.GetKeyDown(Switch))
@@ -24,7 +26,6 @@ namespace Payload.MonoScript
                 {
                     Active = false;
                     MovingTransform = null;
-                    Distance = Vector3.zero;
                 }
                 else
                 {
@@ -34,7 +35,6 @@ namespace Payload.MonoScript
                     {
                         Active = true;
                         MovingTransform = go.transform;
-                        Distance = MovingTransform.position - Camera.main.transform.position;
                     }
                     else
                     {
@@ -42,17 +42,42 @@ namespace Payload.MonoScript
 
                         Active = false;
                         MovingTransform = null;
-                        Distance = Vector3.zero;
                     }
                 }
             }
 
             if (!Active) return;
-            
+
+            if (Input.GetKeyDown(MvSpdInc)) MvSpd += 10f;
+            if (Input.GetKeyDown(MvSpdDec)) MvSpd -= 10f;
+            if (MvSpd < 0f) MvSpd = 0f;
 
             if (MovingTransform)
             {
-                MovingTransform.position = Distance + Camera.main.transform.position;
+                if (Input.GetKey(KeyCode.UpArrow))
+                {
+                    MovingTransform.position += Vector3.forward * MvSpd * Time.deltaTime;
+                }
+                if (Input.GetKey(KeyCode.DownArrow))
+                {
+                    MovingTransform.position += Vector3.back * MvSpd * Time.deltaTime;
+                }
+                if (Input.GetKey(KeyCode.LeftArrow))
+                {
+                    MovingTransform.position += Vector3.left * MvSpd * Time.deltaTime;
+                }
+                if (Input.GetKey(KeyCode.RightArrow))
+                {
+                    MovingTransform.position += Vector3.right * MvSpd * Time.deltaTime;
+                }
+                if (Input.GetKey(KeyCode.RightShift))
+                {
+                    MovingTransform.position += Vector3.up * MvSpd * Time.deltaTime;
+                }
+                if (Input.GetKey(KeyCode.RightControl))
+                {
+                    MovingTransform.position += Vector3.down * MvSpd * Time.deltaTime;
+                }
 
             }
             else
@@ -65,10 +90,12 @@ namespace Payload.MonoScript
         }
 
 
-        private string TransformPath = string.Empty;
+        public static string TransformPath = string.Empty;
         private void OnGUI()
         {
             if(!Active) TransformPath = GUI.TextField(new Rect(Screen.width * 0.35f, Screen.height * 0.05f, Screen.width * 0.3f, 20), TransformPath, 50);
         }
+
+
     }
 }

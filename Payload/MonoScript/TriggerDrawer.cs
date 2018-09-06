@@ -267,14 +267,30 @@ namespace Payload.MonoScript
             GUILayout.Window(1, HierRect, (id) =>
             {
                 ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, GUILayout.Width(HierRect.width), GUILayout.Height(HierRect.height));
+                GUILayout.BeginVertical();
                 foreach (Collider t in TriggerHashSet)
                 {
-                    GUILayout.Label(Utils.GetGameObjectPath(t.gameObject), new GUIStyle(GUI.skin.label) { fontSize = 13 });
+                    GUILayout.BeginHorizontal();
+                    string str = Utils.GetGameObjectPath(t.gameObject);
+                    if (GUILayout.Button("□",GUILayout.Width(20)))
+                    {
+                        TransformMover.TransformPath = str;
+                    }
+                    GUILayout.Label(str, new GUIStyle(GUI.skin.label) { fontSize = 13 });
+                    GUILayout.EndHorizontal();
                 }
                 foreach (Collider2D t2d in Trigger2DHashSet)
                 {
-                    GUILayout.Label(Utils.GetGameObjectPath(t2d.gameObject), new GUIStyle(GUI.skin.label) { fontSize = 13 });
+                    GUILayout.BeginHorizontal();
+                    string str = Utils.GetGameObjectPath(t2d.gameObject);
+                    if (GUILayout.Button("□", GUILayout.Width(20)))
+                    {
+                        TransformMover.TransformPath = str;
+                    }
+                    GUILayout.Label(str, new GUIStyle(GUI.skin.label) { fontSize = 13 });
+                    GUILayout.EndHorizontal();
                 }
+                GUILayout.EndVertical();
                 GUILayout.EndScrollView();
             }, "Trigger Hierarchy", new GUIStyle(GUI.skin.window) { fontSize = 18 });
         }
