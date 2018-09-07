@@ -158,15 +158,32 @@ namespace Payload.MonoScript
                             foreach (PropertyInfo prop in props)
                             {
                                 GUILayout.BeginHorizontal();
-                                GUILayout.Label(prop.PropertyType.Name + " " + prop.Name + " = "+ prop.GetValue(TargetComponent, null), new GUIStyle(GUI.skin.label) { fontSize = 13 });
-                                //prop.SetValue(
-                                //    TargetComponent,
-                                //    Convert.ChangeType(
-                                //GUILayout.TextField(, 50);
-                                //,
-                                //        prop.PropertyType)
-                                //        , null);
+                                object val = prop.GetValue(TargetComponent, null);
+                                GUILayout.Label(prop.PropertyType.Name + " " + prop.Name + " = " + val, new GUIStyle(GUI.skin.label) { fontSize = 13 });
 
+                                if (prop.CanWrite)
+                                {
+                                    if (prop.PropertyType == typeof(bool))
+                                    {
+                                        prop.SetValue(TargetComponent, GUILayout.Toggle(Convert.ToBoolean(val), ""), null);
+                                    }
+                                    else if (prop.PropertyType == typeof(int))
+                                    {
+                                        prop.SetValue(TargetComponent, Convert.ToInt32(GUILayout.TextField(((int)val) + "")), null);
+                                    }
+                                    else if (prop.PropertyType == typeof(float))
+                                    {
+                                       prop.SetValue(TargetComponent, Convert.ToSingle(GUILayout.TextField(((float)val) + "")), null);
+                                    }
+                                    else if (prop.PropertyType == typeof(double))
+                                    {
+                                        prop.SetValue(TargetComponent, Convert.ToDouble(GUILayout.TextField(((double)val) + "")), null);
+                                    }
+                                    else if (prop.PropertyType == typeof(string))
+                                    {
+                                        prop.SetValue(TargetComponent, GUILayout.TextField((string)val), null);
+                                    }
+                                }
                                 GUILayout.EndHorizontal();
                             }
 
