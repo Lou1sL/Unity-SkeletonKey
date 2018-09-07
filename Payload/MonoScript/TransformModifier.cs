@@ -22,7 +22,7 @@ namespace Payload.MonoScript
 
         private Rect PathInputerRect = new Rect(Screen.width * 0.35f, Screen.height * 0.05f, Screen.width * 0.3f, 20);
 
-        private Rect StatisticRect = new Rect(Screen.width * 0.35f, Screen.height * 0.05f, Screen.width * 0.3f, Screen.height * 0.4f);
+        private Rect CompoRect = new Rect(Screen.width * 0.35f, Screen.height * 0.05f, Screen.width * 0.3f, Screen.height * 0.3f);
         private Rect PropRect = new Rect(Screen.width * 0.35f, Screen.height * 0.45f, Screen.width * 0.3f, Screen.height * 0.5f);
 
         private Vector2 ScrollPosition = new Vector2();
@@ -121,9 +121,9 @@ namespace Payload.MonoScript
                 if (TargetTransform)
                 {
                     
-                    GUILayout.Window(WindowID.TRANSFORM_MODIFIER_COMPONENT_LIST, StatisticRect, (id) =>
+                    GUILayout.Window(WindowID.TRANSFORM_MODIFIER_COMPONENT_LIST, CompoRect, (id) =>
                     {
-                        ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, GUILayout.Width(StatisticRect.width), GUILayout.Height(StatisticRect.height));
+                        ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, GUILayout.Width(CompoRect.width), GUILayout.Height(CompoRect.height));
                         GUILayout.BeginVertical();
                         //
                         foreach (MonoBehaviour mb in TargetTransform.GetComponents<MonoBehaviour>())
