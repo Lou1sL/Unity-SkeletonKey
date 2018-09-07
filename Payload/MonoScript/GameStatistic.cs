@@ -31,7 +31,7 @@ namespace Payload.MonoScript
             
             GUILayout.Window(WindowID.GAME_STATISTIC, WindowRect, (id) =>
             {
-                ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, GUILayout.Width(WindowRect.width), GUILayout.Height(WindowRect.height - 20));
+                ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, GUILayout.Width(WindowRect.width), GUILayout.Height(WindowRect.height));
                 GUILayout.Label(str, new GUIStyle(GUI.skin.label) { fontSize = 13 });
                 GUILayout.EndScrollView();
             }, "Game Statistic", new GUIStyle(GUI.skin.window) { fontSize = 15 });
