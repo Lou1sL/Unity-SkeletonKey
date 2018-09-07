@@ -6,6 +6,16 @@ using UnityEngine;
 
 namespace Payload.MonoScript
 {
+    public static class WindowID
+    {
+        public const int CONSOLE                            = 0x00;
+        public const int GAME_STATISTIC                     = 0x01;
+        public const int TRANSFORM_WITH_TRIGGER_LIST        = 0x02;
+        public const int TRANSFORM_MODIFIER_COMPONENT_LIST  = 0x03;
+
+    }
+
+
     public static class Utils
     {
 

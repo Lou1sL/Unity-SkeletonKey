@@ -34,7 +34,7 @@ namespace Payload.MonoScript
         private void OnGUI()
         {
             if (!Active) return;
-            GUILayout.Window(0, ConsoleRect, (id) =>
+            GUILayout.Window(WindowID.CONSOLE, ConsoleRect, (id) =>
             {
                 ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, GUILayout.Width(ConsoleRect.width), GUILayout.Height(ConsoleRect.height - 20));
                 GUILayout.Label(GetConsoleString(), new GUIStyle(GUI.skin.label) { fontSize = 13 });
@@ -42,11 +42,11 @@ namespace Payload.MonoScript
 
 
                 GUILayout.BeginHorizontal();
-                if (GUILayout.Button("清除", GUILayout.Height(20), GUILayout.Width(ConsoleRect.width * 0.5f))) Clear();
-                if (GUILayout.Button("关闭(按HOME键开启)", GUILayout.Height(20), GUILayout.Width(ConsoleRect.width * 0.5f))) Active = false;
+                if (GUILayout.Button("Clr", GUILayout.Height(20), GUILayout.Width(ConsoleRect.width * 0.5f))) Clear();
+                if (GUILayout.Button("Close", GUILayout.Height(20), GUILayout.Width(ConsoleRect.width * 0.5f))) Active = false;
                 GUILayout.EndHorizontal();
 
-            }, "Unity Console", new GUIStyle(GUI.skin.window) { fontSize = 18 });
+            }, "Unity Console", new GUIStyle(GUI.skin.window) { fontSize = 15 });
         }
         private void Update()
         {

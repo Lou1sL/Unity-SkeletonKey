@@ -11,8 +11,8 @@ namespace Payload.MonoScript
             gameObject = base.gameObject;
 
             gameObject.AddComponent<Console>();
-            gameObject.AddComponent<Statistic>();
-            gameObject.AddComponent<TransformMover>();
+            gameObject.AddComponent<GameStatistic>();
+            gameObject.AddComponent<TransformModifier>();
             //gameObject.AddComponent<InjectAssetBundle>();
 
             RefreshCamScript();

@@ -264,7 +264,7 @@ namespace Payload.MonoScript
 
             GUI.Label(new Rect(Input.mousePosition.x, Screen.height - Input.mousePosition.y, Screen.width, Screen.height),"<color=#00FF00>"+AimingObjName+"</color>");
 
-            GUILayout.Window(1, HierRect, (id) =>
+            GUILayout.Window(WindowID.TRANSFORM_WITH_TRIGGER_LIST, HierRect, (id) =>
             {
                 ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, GUILayout.Width(HierRect.width), GUILayout.Height(HierRect.height));
                 GUILayout.BeginVertical();
@@ -274,7 +274,7 @@ namespace Payload.MonoScript
                     string str = Utils.GetGameObjectPath(t.gameObject);
                     if (GUILayout.Button("□",GUILayout.Width(20)))
                     {
-                        TransformMover.TransformPath = str;
+                        TransformModifier.TransformPath = str;
                     }
                     GUILayout.Label(str, new GUIStyle(GUI.skin.label) { fontSize = 13 });
                     GUILayout.EndHorizontal();
@@ -285,14 +285,14 @@ namespace Payload.MonoScript
                     string str = Utils.GetGameObjectPath(t2d.gameObject);
                     if (GUILayout.Button("□", GUILayout.Width(20)))
                     {
-                        TransformMover.TransformPath = str;
+                        TransformModifier.TransformPath = str;
                     }
                     GUILayout.Label(str, new GUIStyle(GUI.skin.label) { fontSize = 13 });
                     GUILayout.EndHorizontal();
                 }
                 GUILayout.EndVertical();
                 GUILayout.EndScrollView();
-            }, "Trigger Hierarchy", new GUIStyle(GUI.skin.window) { fontSize = 18 });
+            }, "Trigger Hierarchy", new GUIStyle(GUI.skin.window) { fontSize = 15 });
         }
         
         private string AimingObjName = string.Empty;
