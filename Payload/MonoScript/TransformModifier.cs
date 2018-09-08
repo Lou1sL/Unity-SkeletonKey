@@ -9,7 +9,9 @@ namespace Payload.MonoScript
 {
     public class TransformModifier:MonoBehaviour
     {
-        private bool Active = false;
+        
+
+        private bool IsActive = false;
 
         private KeyCode Switch = KeyCode.ScrollLock;
         private KeyCode MvSpdInc = KeyCode.PageUp;
@@ -20,64 +22,66 @@ namespace Payload.MonoScript
         private Transform TargetTransform;
         private MonoBehaviour TargetComponent;
 
-        private Rect PathInputerRect = new Rect(Screen.width * 0.35f, Screen.height * 0.05f, Screen.width * 0.3f, 20);
+        private Rect PathInputerRect = new Rect(Screen.width * 0.35f, Screen.height * 0.02f, Screen.width * 0.3f, 20);
 
-        private Rect CompoRect = new Rect(Screen.width * 0.35f, Screen.height * 0.05f, Screen.width * 0.3f, Screen.height * 0.3f);
-        private Rect PropRect = new Rect(Screen.width * 0.35f, Screen.height * 0.45f, Screen.width * 0.3f, Screen.height * 0.5f);
+        private Rect CompoRect = new Rect(Screen.width * 0.34f, Screen.height * 0.02f, Screen.width * 0.3f, Screen.height * 0.4f);
+        private Rect PropRect = new Rect(Screen.width * 0.34f, Screen.height * 0.42f, Screen.width * 0.3f, Screen.height * 0.56f);
 
         private Vector2 ScrollPosition = new Vector2();
         private Vector2 ScrollPositionProp = new Vector2();
 
+        private static TransformModifier Instance = null;
+        private void Awake()
+        {
+            Instance = this;
+        }
 
         private void Update()
         {
             if (Input.GetKeyDown(Switch))
             {
-                if (Active)
-                {
-                    Active = false;
-                    TargetTransform = null;
-                    TargetComponent = null;
-                }
+                if (IsActive)
+                    DeActivate();
                 else
-                {
-                    GameObject go = GameObject.Find(TransformPath);
-
-                    if (go)
-                    {
-                        Active = true;
-                        TargetTransform = go.transform;
-                        TargetComponent = null;
-                    }
-                    else
-                    {
-                        Debug.LogError("__Injector--: TransformMover: \r\n GameObject Not Found!Are you sure you entered the right path?");
-
-                        Active = false;
-                        TargetTransform = null;
-                        TargetComponent = null;
-                    }
-                }
+                    Activate();
             }
 
-            if (!Active) return;
-
-            MvSpdModify();
-
-            if (TargetTransform)
+            if (IsActive)
             {
+                MvSpdModify();
 
-                MovingInput();
+                if (TargetTransform)
+                    MovingInput();
+                else
+                    Debug.LogError("__Injector--: TransformMover: \r\n GameObject Has Been Destoried!");
+            }
+        }
+
+        private void DeActivate()
+        {
+            IsActive = false;
+            TargetTransform = null;
+            TargetComponent = null;
+        }
+        private void Activate()
+        {
+            GameObject go = GameObject.Find(TransformPath);
+
+            if (go)
+            {
+                IsActive = true;
+                TargetTransform = go.transform;
+                TargetComponent = null;
             }
             else
             {
-                Debug.LogError("__Injector--: TransformMover: \r\n GameObject Has Been Destoried!");
+                Debug.LogError("__Injector--: TransformMover: \r\n GameObject Not Found!Are you sure you entered the right path?");
+
+                IsActive = false;
+                TargetTransform = null;
+                TargetComponent = null;
             }
-
-            
-
         }
-
         private void MvSpdModify()
         {
             if (Input.GetKeyDown(MvSpdInc)) MvSpd += 10f;
@@ -112,100 +116,116 @@ namespace Payload.MonoScript
             }
         }
 
-        public static string TransformPath = string.Empty;
+        private string TransformPath = string.Empty;
         private void OnGUI()
         {
-            if (Active)
+            if (IsActive)
             {
-                //Transform components
                 if (TargetTransform)
                 {
-                    
-                    GUILayout.Window(WindowID.TRANSFORM_MODIFIER_COMPONENT_LIST, CompoRect, (id) =>
-                    {
-                        ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, GUILayout.Width(CompoRect.width), GUILayout.Height(CompoRect.height));
-                        GUILayout.BeginVertical();
-                        //
-                        foreach (MonoBehaviour mb in TargetTransform.GetComponents<MonoBehaviour>())
-                        {
-                            GUILayout.BeginHorizontal();
-                            if (GUILayout.Button("□", GUILayout.Width(20)))
-                            {
-                                TargetComponent = mb;
-                            }
-                            GUILayout.Label(mb.GetType().Name, new GUIStyle(GUI.skin.label) { fontSize = 13 });
-                            GUILayout.EndHorizontal();
-                        }
-
-                        GUILayout.EndVertical();
-                        GUILayout.EndScrollView();
-                        
-                    }, "Components On " + Utils.GetGameObjectPath(TargetTransform.gameObject), new GUIStyle(GUI.skin.window) { fontSize = 15 });
-
-
+                    OnGUIComponentWindow();
                     if (TargetComponent != null)
-                    {
-                        Type t = TargetComponent.GetType();
-
-                        GUILayout.Window(WindowID.TRANSFORM_MODIFIER_PROPERTIES_LIST, PropRect, (id) =>
-                        {
-                            ScrollPositionProp = GUILayout.BeginScrollView(ScrollPositionProp, GUILayout.Width(PropRect.width), GUILayout.Height(PropRect.height));
-                            GUILayout.BeginVertical();
-
-                           
-                            //
-                            IList<PropertyInfo> props = new List<PropertyInfo>(t.GetProperties());
-                            foreach (PropertyInfo prop in props)
-                            {
-                                GUILayout.BeginHorizontal();
-                                object val = prop.GetValue(TargetComponent, null);
-                                GUILayout.Label(prop.PropertyType.Name + " " + prop.Name + " = " + val, new GUIStyle(GUI.skin.label) { fontSize = 13 });
-
-                                if (prop.CanWrite)
-                                {
-                                    if (prop.PropertyType == typeof(bool))
-                                    {
-                                        prop.SetValue(TargetComponent, GUILayout.Toggle(Convert.ToBoolean(val), ""), null);
-                                    }
-                                    else if (prop.PropertyType == typeof(int))
-                                    {
-                                        prop.SetValue(TargetComponent, Convert.ToInt32(GUILayout.TextField(((int)val) + "")), null);
-                                    }
-                                    else if (prop.PropertyType == typeof(float))
-                                    {
-                                       prop.SetValue(TargetComponent, Convert.ToSingle(GUILayout.TextField(((float)val) + "")), null);
-                                    }
-                                    else if (prop.PropertyType == typeof(double))
-                                    {
-                                        prop.SetValue(TargetComponent, Convert.ToDouble(GUILayout.TextField(((double)val) + "")), null);
-                                    }
-                                    else if (prop.PropertyType == typeof(string))
-                                    {
-                                        prop.SetValue(TargetComponent, GUILayout.TextField((string)val), null);
-                                    }
-                                }
-                                GUILayout.EndHorizontal();
-                            }
-
-                            GUILayout.EndVertical();
-                            GUILayout.EndScrollView();
-
-                        }, "Properties On " + t.Name, new GUIStyle(GUI.skin.window) { fontSize = 15 });
-                    }
-
-                    
-
-
+                        OnGUIPropertyWindow();
                 }
             }
             else
+                OnGUITransformPathInput();
+
+        }
+
+        private void OnGUIComponentWindow()
+        {
+            GUILayout.Window(WindowID.TRANSFORM_MODIFIER_COMPONENT_LIST, CompoRect, (id) =>
             {
-                //Transform path input
-                TransformPath = GUI.TextField(PathInputerRect, TransformPath, 50);
-            }
-            
+                GUILayout.BeginHorizontal();
+                GUILayout.Label("MoveSpd(0-500)");
+                MvSpd = GUILayout.HorizontalSlider(MvSpd, 0f, 200f);
+                GUILayout.EndHorizontal();
+
+                ScrollPosition = GUILayout.BeginScrollView(ScrollPosition);
+                GUILayout.BeginVertical();
+                //
+                foreach (MonoBehaviour mb in TargetTransform.GetComponents<MonoBehaviour>())
+                {
+                    GUILayout.BeginHorizontal();
+                    if (GUILayout.Button("□", GUILayout.Width(20)))
+                    {
+                        TargetComponent = mb;
+                    }
+                    GUILayout.Label(mb.GetType().Name, new GUIStyle(GUI.skin.label) { fontSize = 13 });
+                    GUILayout.EndHorizontal();
+                }
+
+                GUILayout.EndVertical();
+                GUILayout.EndScrollView();
+
+            }, "Components On " + Utils.GetGameObjectPath(TargetTransform.gameObject), new GUIStyle(GUI.skin.window) { fontSize = 15 });
+        }
+        private void OnGUIPropertyWindow()
+        {
+            GUILayout.Window(WindowID.TRANSFORM_MODIFIER_PROPERTIES_LIST, PropRect, (id) =>
+            {
+                ScrollPositionProp = GUILayout.BeginScrollView(ScrollPositionProp);
+                GUILayout.BeginVertical();
+                //
+                IList<PropertyInfo> props = new List<PropertyInfo>(TargetComponent.GetType().GetProperties());
+                foreach (PropertyInfo prop in props)
+                {
+                    GUILayout.BeginHorizontal();
+                    
+                    if (prop.CanRead)
+                    {
+                        object val = prop.GetValue(TargetComponent, null);
+                        GUILayout.Label(prop.Name + "(" + prop.PropertyType.Name + ") : " + val, new GUIStyle(GUI.skin.label) { fontSize = 13 });
+                        
+                        if (prop.CanWrite)
+                        {
+                            if (prop.PropertyType == typeof(bool))
+                            {
+                                prop.SetValue(TargetComponent, GUILayout.Toggle(Convert.ToBoolean(val), ""), null);
+                            }
+                            else if (prop.PropertyType == typeof(int))
+                            {
+                                prop.SetValue(TargetComponent, Convert.ToInt32(GUILayout.TextField(((int)val) + "")), null);
+                            }
+                            else if (prop.PropertyType == typeof(float))
+                            {
+                                prop.SetValue(TargetComponent, Convert.ToSingle(GUILayout.TextField(((float)val) + "")), null);
+                            }
+                            else if (prop.PropertyType == typeof(double))
+                            {
+                                prop.SetValue(TargetComponent, Convert.ToDouble(GUILayout.TextField(((double)val) + "")), null);
+                            }
+                            else if (prop.PropertyType == typeof(string))
+                            {
+                                prop.SetValue(TargetComponent, GUILayout.TextField((string)val), null);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        GUILayout.Label(prop.Name + "(" + prop.PropertyType.Name + ") : __UNREADABLE", new GUIStyle(GUI.skin.label) { fontSize = 13 });
+                    }
+                    GUILayout.EndHorizontal();
+                }
+
+                GUILayout.EndVertical();
+                GUILayout.EndScrollView();
+
+            }, "Properties On " + TargetComponent.GetType().Name, new GUIStyle(GUI.skin.window) { fontSize = 15 });
+        }
+        private void OnGUITransformPathInput()
+        {
+            TransformPath = GUI.TextField(PathInputerRect, TransformPath);
         }
 
 
+        public static void Activate(string path)
+        {
+            if(!Instance)
+                Debug.LogError("__Injector--: TransformMover: \r\n Instance Not Initialized!");
+            Instance.TransformPath = path;
+            Instance.Activate();
+        }
     }
 }

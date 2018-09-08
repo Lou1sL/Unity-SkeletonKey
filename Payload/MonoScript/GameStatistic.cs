@@ -10,7 +10,7 @@ namespace Payload.MonoScript
         private bool Active = true;
         private KeyCode Switch = KeyCode.Delete;
 
-        private Rect WindowRect = new Rect(Screen.width * 0.68f, Screen.height * 0.02f, Screen.width * 0.3f, Screen.height * 0.48f);
+        private Rect WindowRect = new Rect(Screen.width * 0.66f, Screen.height * 0.02f, Screen.width * 0.32f, Screen.height * 0.3f);
         private Vector2 ScrollPosition = new Vector2();
 
         private void OnGUI()
@@ -31,7 +31,7 @@ namespace Payload.MonoScript
             
             GUILayout.Window(WindowID.GAME_STATISTIC, WindowRect, (id) =>
             {
-                ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, GUILayout.Width(WindowRect.width), GUILayout.Height(WindowRect.height));
+                ScrollPosition = GUILayout.BeginScrollView(ScrollPosition);
                 GUILayout.Label(str, new GUIStyle(GUI.skin.label) { fontSize = 13 });
                 GUILayout.EndScrollView();
             }, "Game Statistic", new GUIStyle(GUI.skin.window) { fontSize = 15 });

@@ -3,15 +3,16 @@ using UnityEngine;
 
 namespace Payload.MonoScript
 {
-    public class TriggerDrawer : MonoBehaviour
+    public class ColliderDrawer : MonoBehaviour
     {
         private bool Active = true;
+        private bool IsTriggerOnly = true;
 
         private KeyCode Switch = KeyCode.End;
         private KeyCode DrawDistInc = KeyCode.PageUp;
         private KeyCode DrawDistDec = KeyCode.PageDown;
 
-        private Rect HierRect = new Rect(Screen.width * 0.02f, Screen.height * 0.02f, Screen.width * 0.3f, Screen.height*0.9f);
+        private Rect HierRect = new Rect(Screen.width * 0.02f, Screen.height * 0.02f, Screen.width * 0.3f, Screen.height*0.96f);
         private Vector2 ScrollPosition = new Vector2();
 
 
@@ -222,12 +223,9 @@ namespace Payload.MonoScript
 
                     if (c)
                     {
-                        if (Vector3.Distance(go.transform.position, transform.position) <= DrawDistance)
+                        if (Vector3.Distance(go.transform.position, transform.position) <= DrawDistance && ((IsTriggerOnly && c.isTrigger) || (!IsTriggerOnly)))
                         {
-                            if (c && c.isTrigger)
-                            {
-                                TriggerHashSet.Add(c);
-                            }
+                            TriggerHashSet.Add(c);
                         }
                         else if (TriggerHashSet.Contains(c))
                         {
@@ -239,12 +237,9 @@ namespace Payload.MonoScript
 
                     if (c2d)
                     {
-                        if (Vector2.Distance(go.transform.position, transform.position) <= DrawDistance)
+                        if (Vector2.Distance(go.transform.position, transform.position) <= DrawDistance && ((IsTriggerOnly && c.isTrigger) || (!IsTriggerOnly)))
                         {
-                            if (c2d && c2d.isTrigger)
-                            {
-                                Trigger2DHashSet.Add(c2d);
-                            }
+                            Trigger2DHashSet.Add(c2d);
                         }
                         else if (Trigger2DHashSet.Contains(c2d))
                         {
@@ -261,12 +256,17 @@ namespace Payload.MonoScript
         private void OnGUI()
         {
             if (!Active) return;
-
             GUI.Label(new Rect(Input.mousePosition.x, Screen.height - Input.mousePosition.y, Screen.width, Screen.height),"<color=#00FF00>"+AimingObjName+"</color>");
-
+            
             GUILayout.Window(WindowID.TRANSFORM_WITH_TRIGGER_LIST, HierRect, (id) =>
             {
-                ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, GUILayout.Width(HierRect.width), GUILayout.Height(HierRect.height));
+                GUILayout.BeginHorizontal();
+                IsTriggerOnly = GUILayout.Toggle(IsTriggerOnly, "IsTriggerOnly");
+                GUILayout.Label("DetectDist(0-500)");
+                DrawDistance = GUILayout.HorizontalSlider(DrawDistance, 0f, 500f);
+                GUILayout.EndHorizontal();
+
+                ScrollPosition = GUILayout.BeginScrollView(ScrollPosition);
                 GUILayout.BeginVertical();
                 foreach (Collider t in TriggerHashSet)
                 {
@@ -274,7 +274,7 @@ namespace Payload.MonoScript
                     string str = Utils.GetGameObjectPath(t.gameObject);
                     if (GUILayout.Button("□",GUILayout.Width(20)))
                     {
-                        TransformModifier.TransformPath = str;
+                        TransformModifier.Activate(str);
                     }
                     GUILayout.Label(str, new GUIStyle(GUI.skin.label) { fontSize = 13 });
                     GUILayout.EndHorizontal();
@@ -285,7 +285,7 @@ namespace Payload.MonoScript
                     string str = Utils.GetGameObjectPath(t2d.gameObject);
                     if (GUILayout.Button("□", GUILayout.Width(20)))
                     {
-                        TransformModifier.TransformPath = str;
+                        TransformModifier.Activate(str);
                     }
                     GUILayout.Label(str, new GUIStyle(GUI.skin.label) { fontSize = 13 });
                     GUILayout.EndHorizontal();
@@ -304,7 +304,7 @@ namespace Payload.MonoScript
             RaycastHit[] hits = Physics.RaycastAll(Camera.main.ScreenPointToRay(Input.mousePosition), DrawDistance);
             foreach (RaycastHit hit in hits)
             {
-                if (hit.collider.isTrigger)
+                if ((IsTriggerOnly && hit.collider.isTrigger) || (!IsTriggerOnly))
                 {
                     AimingObjName += Utils.GetGameObjectPath(hit.transform.gameObject)+"\n";
                 }
@@ -317,9 +317,10 @@ namespace Payload.MonoScript
             else hit2ds = Physics2D.RaycastAll(Utils.ScreenToWorldPointPerspective(Input.mousePosition), Vector2.zero);
             foreach (RaycastHit2D hit2d in hit2ds)
             {
-                if (hit2d && hit2d.collider.isTrigger)
+                if (hit2d)
                 {
-                    AimingObjName += Utils.GetGameObjectPath(hit2d.transform.gameObject) + "\n";
+                    if((IsTriggerOnly && hit2d.collider.isTrigger) || (!IsTriggerOnly))
+                        AimingObjName += Utils.GetGameObjectPath(hit2d.transform.gameObject) + "\n";
                 }
             }
             

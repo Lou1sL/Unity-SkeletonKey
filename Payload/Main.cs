@@ -13,7 +13,7 @@ namespace Payload
         {
             gameObject = new GameObject();
             gameObject.name = "InjectedMonoManager";
-            gameObject.AddComponent<InjectedMonoManager>();
+            gameObject.AddComponent<InjectMonoManager>();
             Object.DontDestroyOnLoad(gameObject);
         }
         public static void Eject()

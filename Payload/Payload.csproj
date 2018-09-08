@@ -67,10 +67,10 @@
     <Compile Include="MonoScript\FreeMainCamera.cs" />
     <Compile Include="MonoScript\GameStatistic.cs" />
     <Compile Include="MonoScript\TransformModifier.cs" />
-    <Compile Include="MonoScript\TriggerDrawer.cs" />
+    <Compile Include="MonoScript\ColliderDrawer.cs" />
     <Compile Include="MonoScript\Console.cs" />
     <Compile Include="MonoScript\InjectAssetBundle.cs" />
-    <Compile Include="MonoScript\InjectedMonoManager.cs" />
+    <Compile Include="MonoScript\InjectMonoManager.cs" />
     <Compile Include="MonoScript\Utils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

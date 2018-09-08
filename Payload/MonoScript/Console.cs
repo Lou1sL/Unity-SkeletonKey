@@ -7,9 +7,11 @@ namespace Payload.MonoScript
     public class Console : MonoBehaviour
     {
         private bool Active = true;
+        private bool WriteToLog = false;
+
         private KeyCode Switch = KeyCode.Home;
 
-        private Rect ConsoleRect = new Rect(Screen.width * 0.35f, Screen.height * 0.65f, Screen.width * 0.6f, Screen.height * 0.3f);
+        private Rect ConsoleRect = new Rect(Screen.width * 0.34f, Screen.height * 0.6f, Screen.width * 0.64f, Screen.height * 0.38f);
         
         private List<string> ConsoleString = new List<string>();
         private Vector2 ScrollPosition = new Vector2();
@@ -28,7 +30,8 @@ namespace Payload.MonoScript
                         ConsoleString.RemoveAt(0);
                     }
 
-                    File.AppendAllText(@".\UnityConsoleInjected.log", "[" + System.DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss.fff") + "] " + type.ToString() + ": " + condition + "\r\n" + (stackTrace != string.Empty ? stackTrace + "\r\n" : string.Empty));
+                    if (WriteToLog)
+                        File.AppendAllText(@".\UnityConsoleInjected.log", "[" + System.DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss.fff") + "] " + type.ToString() + ": " + condition + "\r\n" + (stackTrace != string.Empty ? stackTrace + "\r\n" : string.Empty));
                 };
         }
         private void OnGUI()
@@ -36,14 +39,16 @@ namespace Payload.MonoScript
             if (!Active) return;
             GUILayout.Window(WindowID.CONSOLE, ConsoleRect, (id) =>
             {
-                ScrollPosition = GUILayout.BeginScrollView(ScrollPosition, GUILayout.Width(ConsoleRect.width), GUILayout.Height(ConsoleRect.height - 20));
+                WriteToLog = GUILayout.Toggle(WriteToLog, "WriteToLog");
+
+                ScrollPosition = GUILayout.BeginScrollView(ScrollPosition);
                 GUILayout.Label(GetConsoleString(), new GUIStyle(GUI.skin.label) { fontSize = 13 });
                 GUILayout.EndScrollView();
 
 
                 GUILayout.BeginHorizontal();
-                if (GUILayout.Button("Clr", GUILayout.Height(20), GUILayout.Width(ConsoleRect.width * 0.5f))) Clear();
-                if (GUILayout.Button("Close", GUILayout.Height(20), GUILayout.Width(ConsoleRect.width * 0.5f))) Active = false;
+                if (GUILayout.Button("Clr", GUILayout.Height(20))) Clear();
+                if (GUILayout.Button("Close", GUILayout.Height(20))) Active = false;
                 GUILayout.EndHorizontal();
 
             }, "Unity Console", new GUIStyle(GUI.skin.window) { fontSize = 15 });

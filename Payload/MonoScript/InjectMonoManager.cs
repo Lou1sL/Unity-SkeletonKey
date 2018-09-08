@@ -2,7 +2,7 @@
 
 namespace Payload.MonoScript
 {
-    public class InjectedMonoManager : MonoBehaviour
+    public class InjectMonoManager : MonoBehaviour
     {
         public static new GameObject gameObject { get; private set; }
 
@@ -24,8 +24,8 @@ namespace Payload.MonoScript
                 Camera.main.gameObject.AddComponent<FreeMainCamera>();
 
 
-            if (!Camera.main.gameObject.GetComponent<TriggerDrawer>())
-                Camera.main.gameObject.AddComponent<TriggerDrawer>();
+            if (!Camera.main.gameObject.GetComponent<ColliderDrawer>())
+                Camera.main.gameObject.AddComponent<ColliderDrawer>();
 
             Invoke("RefreshCamScript", 3f);
         }
