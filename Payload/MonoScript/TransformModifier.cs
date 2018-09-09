@@ -145,6 +145,11 @@ namespace Payload.MonoScript
                 MvSpd = GUILayout.HorizontalSlider(MvSpd, 0f, 200f);
                 GUILayout.EndHorizontal();
 
+                TargetTransform.gameObject.SetActive(GUILayout.Toggle(TargetTransform.gameObject.activeInHierarchy, "Active"));
+                GUILayout.Label("Position: " + Utils.Vec2Str(TargetTransform.position));
+                GUILayout.Label("EulerAng: " + Utils.Vec2Str(TargetTransform.eulerAngles));
+                GUILayout.Label("Scale: " + Utils.Vec2Str(TargetTransform.lossyScale));
+                
                 ScrollPosition = GUILayout.BeginScrollView(ScrollPosition);
                 GUILayout.BeginVertical();
                 //
@@ -168,6 +173,7 @@ namespace Payload.MonoScript
         {
             GUILayout.Window(WindowID.TRANSFORM_MODIFIER_PROPERTIES_LIST, PropRect, (id) =>
             {
+                TargetComponent.enabled = (GUILayout.Toggle(TargetComponent.enabled, "Enabled"));
                 ScrollPositionProp = GUILayout.BeginScrollView(ScrollPositionProp);
                 GUILayout.BeginVertical();
                 //
@@ -175,53 +181,75 @@ namespace Payload.MonoScript
                 foreach (PropertyInfo prop in props)
                 {
                     GUILayout.BeginHorizontal();
-
-                    try
+                    
+                    if (prop.CanRead)
                     {
-                        if (prop.CanRead)
+                        object val = prop.GetValue(TargetComponent, null);
+                        GUILayout.Label(prop.Name + "(" + prop.PropertyType.Name + ") : " + val, GUIStyles.DEFAULT_LABEL);
+                        if (prop.CanWrite)
                         {
-                            object val = prop.GetValue(TargetComponent, null);
-                            GUILayout.Label(prop.Name + "(" + prop.PropertyType.Name + ") : " + val, GUIStyles.DEFAULT_LABEL);
-                            //TODO:Cause Trouble...
-                            /**
-                            if (prop.CanWrite)
+                            if (prop.PropertyType == typeof(bool))
                             {
-                                if (prop.PropertyType == typeof(bool))
+                                try
                                 {
-                                    prop.SetValue(TargetComponent, GUILayout.Toggle(Convert.ToBoolean(val), ""), null);
+                                    prop.SetValue(TargetComponent, GUILayout.Toggle((bool)val, ""), null);
                                 }
-                                else if (prop.PropertyType == typeof(int))
+                                catch (Exception e)
                                 {
-
+                                    //TODO:...Damn
+                                    Debug.LogError("__Injector--: TransformModifier: \r\n BOOL!" + e.StackTrace);
+                                }
+                            }
+                            else if (prop.PropertyType == typeof(int))
+                            {
+                                try
+                                {
                                     prop.SetValue(TargetComponent, Convert.ToInt32(GUILayout.TextField(((int)val) + "")), null);
                                 }
-                                else if (prop.PropertyType == typeof(float))
+                                catch (Exception e)
                                 {
-
+                                    Debug.LogError("__Injector--: TransformModifier: \r\n INT!" + e.StackTrace);
+                                }
+                            }
+                            else if (prop.PropertyType == typeof(float))
+                            {
+                                try
+                                {
                                     prop.SetValue(TargetComponent, Convert.ToSingle(GUILayout.TextField(((float)val) + "")), null);
                                 }
-                                else if (prop.PropertyType == typeof(double))
+                                catch (Exception e)
                                 {
-
+                                    Debug.LogError("__Injector--: TransformModifier: \r\n FLOAT!" + e.StackTrace);
+                                }
+                            }
+                            else if (prop.PropertyType == typeof(double))
+                            {
+                                try
+                                {
                                     prop.SetValue(TargetComponent, Convert.ToDouble(GUILayout.TextField(((double)val) + "")), null);
                                 }
-                                else if (prop.PropertyType == typeof(string))
+                                catch (Exception e)
+                                {
+                                    Debug.LogError("__Injector--: TransformModifier: \r\n DOUBLE!" + e.StackTrace);
+                                }
+                            }
+                            else if (prop.PropertyType == typeof(string))
+                            {
+                                try
                                 {
                                     prop.SetValue(TargetComponent, GUILayout.TextField((string)val), null);
                                 }
-                            }**/
+                                catch (Exception e)
+                                {
+                                    Debug.LogError("__Injector--: TransformModifier: \r\n BOOL!" + e.StackTrace);
+                                }
+                            }
                         }
-                        else
-                        {
-                            GUILayout.Label(prop.Name + "(" + prop.PropertyType.Name + ") : __UNREADABLE", GUIStyles.DEFAULT_LABEL);
-                        }
-
                     }
-                    catch (Exception e)
+                    else
                     {
-                        Debug.LogError("__Injector--: TransformModifier: \r\n Something Wrong With Drawing Properties On GUI!" + e.StackTrace);
+                        GUILayout.Label(prop.Name + "(" + prop.PropertyType.Name + ") : __UNREADABLE", GUIStyles.DEFAULT_LABEL);
                     }
-
 
                     GUILayout.EndHorizontal();
                 }
