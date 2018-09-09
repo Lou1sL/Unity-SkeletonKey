@@ -53,7 +53,10 @@ namespace Payload.MonoScript
                 if (TargetTransform)
                     MovingInput();
                 else
+                {
                     Debug.LogError("__Injector--: TransformMover: \r\n GameObject Has Been Destoried!");
+                    DeActivate();
+                }
             }
         }
 
@@ -152,14 +155,14 @@ namespace Payload.MonoScript
                     {
                         TargetComponent = mb;
                     }
-                    GUILayout.Label(mb.GetType().Name, new GUIStyle(GUI.skin.label) { fontSize = 13 });
+                    GUILayout.Label(mb.GetType().Name, GUIStyles.DEFAULT_LABEL);
                     GUILayout.EndHorizontal();
                 }
 
                 GUILayout.EndVertical();
                 GUILayout.EndScrollView();
 
-            }, "Components On " + Utils.GetGameObjectPath(TargetTransform.gameObject), new GUIStyle(GUI.skin.window) { fontSize = 15 });
+            }, "Components On " + Utils.GetGameObjectPath(TargetTransform.gameObject), GUIStyles.DEFAULT_WINDOW);
         }
         private void OnGUIPropertyWindow()
         {
@@ -172,47 +175,61 @@ namespace Payload.MonoScript
                 foreach (PropertyInfo prop in props)
                 {
                     GUILayout.BeginHorizontal();
-                    
-                    if (prop.CanRead)
+
+                    try
                     {
-                        object val = prop.GetValue(TargetComponent, null);
-                        GUILayout.Label(prop.Name + "(" + prop.PropertyType.Name + ") : " + val, new GUIStyle(GUI.skin.label) { fontSize = 13 });
-                        
-                        if (prop.CanWrite)
+                        if (prop.CanRead)
                         {
-                            if (prop.PropertyType == typeof(bool))
+                            object val = prop.GetValue(TargetComponent, null);
+                            GUILayout.Label(prop.Name + "(" + prop.PropertyType.Name + ") : " + val, GUIStyles.DEFAULT_LABEL);
+                            //TODO:Cause Trouble...
+                            /**
+                            if (prop.CanWrite)
                             {
-                                prop.SetValue(TargetComponent, GUILayout.Toggle(Convert.ToBoolean(val), ""), null);
-                            }
-                            else if (prop.PropertyType == typeof(int))
-                            {
-                                prop.SetValue(TargetComponent, Convert.ToInt32(GUILayout.TextField(((int)val) + "")), null);
-                            }
-                            else if (prop.PropertyType == typeof(float))
-                            {
-                                prop.SetValue(TargetComponent, Convert.ToSingle(GUILayout.TextField(((float)val) + "")), null);
-                            }
-                            else if (prop.PropertyType == typeof(double))
-                            {
-                                prop.SetValue(TargetComponent, Convert.ToDouble(GUILayout.TextField(((double)val) + "")), null);
-                            }
-                            else if (prop.PropertyType == typeof(string))
-                            {
-                                prop.SetValue(TargetComponent, GUILayout.TextField((string)val), null);
-                            }
+                                if (prop.PropertyType == typeof(bool))
+                                {
+                                    prop.SetValue(TargetComponent, GUILayout.Toggle(Convert.ToBoolean(val), ""), null);
+                                }
+                                else if (prop.PropertyType == typeof(int))
+                                {
+
+                                    prop.SetValue(TargetComponent, Convert.ToInt32(GUILayout.TextField(((int)val) + "")), null);
+                                }
+                                else if (prop.PropertyType == typeof(float))
+                                {
+
+                                    prop.SetValue(TargetComponent, Convert.ToSingle(GUILayout.TextField(((float)val) + "")), null);
+                                }
+                                else if (prop.PropertyType == typeof(double))
+                                {
+
+                                    prop.SetValue(TargetComponent, Convert.ToDouble(GUILayout.TextField(((double)val) + "")), null);
+                                }
+                                else if (prop.PropertyType == typeof(string))
+                                {
+                                    prop.SetValue(TargetComponent, GUILayout.TextField((string)val), null);
+                                }
+                            }**/
                         }
+                        else
+                        {
+                            GUILayout.Label(prop.Name + "(" + prop.PropertyType.Name + ") : __UNREADABLE", GUIStyles.DEFAULT_LABEL);
+                        }
+
                     }
-                    else
+                    catch (Exception e)
                     {
-                        GUILayout.Label(prop.Name + "(" + prop.PropertyType.Name + ") : __UNREADABLE", new GUIStyle(GUI.skin.label) { fontSize = 13 });
+                        Debug.LogError("__Injector--: TransformModifier: \r\n Something Wrong With Drawing Properties On GUI!" + e.StackTrace);
                     }
+
+
                     GUILayout.EndHorizontal();
                 }
 
                 GUILayout.EndVertical();
                 GUILayout.EndScrollView();
 
-            }, "Properties On " + TargetComponent.GetType().Name, new GUIStyle(GUI.skin.window) { fontSize = 15 });
+            }, "Properties On " + TargetComponent.GetType().Name, GUIStyles.DEFAULT_WINDOW);
         }
         private void OnGUITransformPathInput()
         {

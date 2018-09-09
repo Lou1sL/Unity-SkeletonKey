@@ -42,7 +42,7 @@ namespace Payload.MonoScript
                 WriteToLog = GUILayout.Toggle(WriteToLog, "WriteToLog");
 
                 ScrollPosition = GUILayout.BeginScrollView(ScrollPosition);
-                GUILayout.Label(GetConsoleString(), new GUIStyle(GUI.skin.label) { fontSize = 13 });
+                GUILayout.Label(GetConsoleString(), GUIStyles.DEFAULT_LABEL);
                 GUILayout.EndScrollView();
 
 
@@ -51,7 +51,7 @@ namespace Payload.MonoScript
                 if (GUILayout.Button("Close", GUILayout.Height(20))) Active = false;
                 GUILayout.EndHorizontal();
 
-            }, "Unity Console", new GUIStyle(GUI.skin.window) { fontSize = 15 });
+            }, "Unity Console", GUIStyles.DEFAULT_WINDOW);
         }
         private void Update()
         {

@@ -6,6 +6,11 @@ using UnityEngine;
 
 namespace Payload.MonoScript
 {
+    public class GUIStyles
+    {
+        public static readonly GUIStyle DEFAULT_LABEL = new GUIStyle(GUI.skin.label) { fontSize = 13 };
+        public static readonly GUIStyle DEFAULT_WINDOW = new GUIStyle(GUI.skin.window) { fontSize = 15 };
+    }
     public static class WindowID
     {
         public const int CONSOLE                            = 0x00;
@@ -47,20 +52,10 @@ namespace Payload.MonoScript
         }
         public static Matrix4x4 ScreenToWorldMatrix(Camera cam)
         {
-            // Make a matrix that converts from
-            // screen coordinates to clip coordinates.
             var rect = cam.pixelRect;
             var viewportMatrix = Matrix4x4.Ortho(rect.xMin, rect.xMax, rect.yMin, rect.yMax, -1, 1);
-
-            // The camera's view-projection matrix converts from world coordinates to clip coordinates.
             var vpMatrix = cam.projectionMatrix * cam.worldToCameraMatrix;
-
-            // Setting column 2 (z-axis) to identity makes the matrix ignore the z-axis.
-            // Instead you get the value on the xy plane!
             vpMatrix.SetColumn(2, new Vector4(0, 0, 1, 0));
-
-            // Going from right to left:
-            // convert screen coords to clip coords, then clip coords to world coords.
             return vpMatrix.inverse * viewportMatrix;
         }
         public static Vector2 ScreenToWorldPointPerspective(Vector2 point)

@@ -276,7 +276,7 @@ namespace Payload.MonoScript
                     {
                         TransformModifier.Activate(str);
                     }
-                    GUILayout.Label(str, new GUIStyle(GUI.skin.label) { fontSize = 13 });
+                    GUILayout.Label(str, GUIStyles.DEFAULT_LABEL);
                     GUILayout.EndHorizontal();
                 }
                 foreach (Collider2D t2d in Trigger2DHashSet)
@@ -287,12 +287,12 @@ namespace Payload.MonoScript
                     {
                         TransformModifier.Activate(str);
                     }
-                    GUILayout.Label(str, new GUIStyle(GUI.skin.label) { fontSize = 13 });
+                    GUILayout.Label(str, GUIStyles.DEFAULT_LABEL);
                     GUILayout.EndHorizontal();
                 }
                 GUILayout.EndVertical();
                 GUILayout.EndScrollView();
-            }, "Trigger Hierarchy", new GUIStyle(GUI.skin.window) { fontSize = 15 });
+            }, "Trigger Hierarchy", GUIStyles.DEFAULT_WINDOW);
         }
         
         private string AimingObjName = string.Empty;
