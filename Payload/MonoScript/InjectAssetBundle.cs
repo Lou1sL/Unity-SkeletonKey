@@ -15,7 +15,7 @@ namespace Payload.MonoScript
 
         void Start()
         {
-            Debug.Log("__Injector--: InjectAssetBundle: \r\n AssetBundle Injection Will Be Started In 5 Sec!");
+            this.InjectLog("AssetBundle Injection Will Be Started In 5 Sec!");
             Invoke("InitAsset", 5f);
         }
 
@@ -34,7 +34,7 @@ namespace Payload.MonoScript
             string[] scenePaths = InjectedScene.GetAllScenePaths();
 
             string sceneName = Path.GetFileNameWithoutExtension(scenePaths[0]);
-            Debug.Log("__Injector--: InjectAssetBundle: \r\n Load scene:" + sceneName);
+            this.InjectLog("Load scene:" + sceneName);
             //SceneManager.LoadScene(sceneName);
         }
     }

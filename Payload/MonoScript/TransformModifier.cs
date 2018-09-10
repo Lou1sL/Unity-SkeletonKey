@@ -13,9 +13,9 @@ namespace Payload.MonoScript
 
         private bool IsActive = false;
 
-        private KeyCode Switch = KeyCode.ScrollLock;
-        private KeyCode MvSpdInc = KeyCode.PageUp;
-        private KeyCode MvSpdDec = KeyCode.PageDown;
+        private KeyCode Switch = KeyCode.Home;
+        private KeyCode MvSpdInc = KeyCode.End;
+        private KeyCode MvSpdDec = KeyCode.Delete;
 
         private float MvSpd = 100f;
 
@@ -54,7 +54,7 @@ namespace Payload.MonoScript
                     MovingInput();
                 else
                 {
-                    Debug.LogError("__Injector--: TransformMover: \r\n GameObject Has Been Destoried!");
+                    this.InjectLogError("GameObject Has Been Destoried!");
                     DeActivate();
                 }
             }
@@ -78,7 +78,7 @@ namespace Payload.MonoScript
             }
             else
             {
-                Debug.LogError("__Injector--: TransformMover: \r\n GameObject Not Found!Are you sure you entered the right path?");
+                this.InjectLogError("GameObject Not Found!Are you sure you entered the right path?");
 
                 IsActive = false;
                 TargetTransform = null;
@@ -146,9 +146,9 @@ namespace Payload.MonoScript
                 GUILayout.EndHorizontal();
 
                 TargetTransform.gameObject.SetActive(GUILayout.Toggle(TargetTransform.gameObject.activeInHierarchy, "Active"));
-                GUILayout.Label("Position: " + Utils.Vec2Str(TargetTransform.position));
-                GUILayout.Label("EulerAng: " + Utils.Vec2Str(TargetTransform.eulerAngles));
-                GUILayout.Label("Scale: " + Utils.Vec2Str(TargetTransform.lossyScale));
+                GUILayout.Label("Position: " + Utils.Vec32Str(TargetTransform.position));
+                GUILayout.Label("EulerAng: " + Utils.Vec32Str(TargetTransform.eulerAngles));
+                GUILayout.Label("Scale: " + Utils.Vec32Str(TargetTransform.lossyScale));
                 
                 ScrollPosition = GUILayout.BeginScrollView(ScrollPosition);
                 GUILayout.BeginVertical();
@@ -159,6 +159,10 @@ namespace Payload.MonoScript
                     if (GUILayout.Button("□", GUILayout.Width(20)))
                     {
                         TargetComponent = mb;
+                    }
+                    if (GUILayout.Button("RM", GUILayout.Width(40)))
+                    {
+                        Destroy(mb);
                     }
                     GUILayout.Label(mb.GetType().Name, GUIStyles.DEFAULT_LABEL);
                     GUILayout.EndHorizontal();
@@ -181,75 +185,38 @@ namespace Payload.MonoScript
                 foreach (PropertyInfo prop in props)
                 {
                     GUILayout.BeginHorizontal();
-                    
-                    if (prop.CanRead)
+
+                    try
                     {
-                        object val = prop.GetValue(TargetComponent, null);
-                        GUILayout.Label(prop.Name + "(" + prop.PropertyType.Name + ") : " + val, GUIStyles.DEFAULT_LABEL);
-                        if (prop.CanWrite)
+                        if (prop.CanRead)
                         {
-                            if (prop.PropertyType == typeof(bool))
+                            object val = prop.GetValue(TargetComponent, null);
+                            GUILayout.Label(prop.Name + "(" + prop.PropertyType.Name + ") : " + val, GUIStyles.DEFAULT_LABEL);
+                            if (prop.CanWrite)
                             {
-                                try
-                                {
+                                if (prop.PropertyType == typeof(bool))
                                     prop.SetValue(TargetComponent, GUILayout.Toggle((bool)val, ""), null);
-                                }
-                                catch (Exception e)
-                                {
-                                    //TODO:...Damn
-                                    Debug.LogError("__Injector--: TransformModifier: \r\n BOOL!" + e.StackTrace);
-                                }
-                            }
-                            else if (prop.PropertyType == typeof(int))
-                            {
-                                try
-                                {
+                                else if (prop.PropertyType == typeof(int))
                                     prop.SetValue(TargetComponent, Convert.ToInt32(GUILayout.TextField(((int)val) + "")), null);
-                                }
-                                catch (Exception e)
-                                {
-                                    Debug.LogError("__Injector--: TransformModifier: \r\n INT!" + e.StackTrace);
-                                }
-                            }
-                            else if (prop.PropertyType == typeof(float))
-                            {
-                                try
-                                {
+                                else if (prop.PropertyType == typeof(float))
                                     prop.SetValue(TargetComponent, Convert.ToSingle(GUILayout.TextField(((float)val) + "")), null);
-                                }
-                                catch (Exception e)
-                                {
-                                    Debug.LogError("__Injector--: TransformModifier: \r\n FLOAT!" + e.StackTrace);
-                                }
-                            }
-                            else if (prop.PropertyType == typeof(double))
-                            {
-                                try
-                                {
+                                else if (prop.PropertyType == typeof(double))
                                     prop.SetValue(TargetComponent, Convert.ToDouble(GUILayout.TextField(((double)val) + "")), null);
-                                }
-                                catch (Exception e)
-                                {
-                                    Debug.LogError("__Injector--: TransformModifier: \r\n DOUBLE!" + e.StackTrace);
-                                }
-                            }
-                            else if (prop.PropertyType == typeof(string))
-                            {
-                                try
-                                {
+                                else if (prop.PropertyType == typeof(string))
                                     prop.SetValue(TargetComponent, GUILayout.TextField((string)val), null);
-                                }
-                                catch (Exception e)
-                                {
-                                    Debug.LogError("__Injector--: TransformModifier: \r\n BOOL!" + e.StackTrace);
-                                }
                             }
                         }
+                        else
+                        {
+                            GUILayout.Label(prop.Name + "(" + prop.PropertyType.Name + ") : __UNREADABLE", GUIStyles.DEFAULT_LABEL);
+                        }
                     }
-                    else
+                    catch (Exception e)
                     {
-                        GUILayout.Label(prop.Name + "(" + prop.PropertyType.Name + ") : __UNREADABLE", GUIStyles.DEFAULT_LABEL);
+                        //TODO:...Damn
+                        this.InjectLogError("Something Went Wrong When Drawing Properties",e);
                     }
+                    
 
                     GUILayout.EndHorizontal();
                 }
@@ -263,12 +230,11 @@ namespace Payload.MonoScript
         {
             TransformPath = GUI.TextField(PathInputerRect, TransformPath);
         }
-
-
+        
         public static void Activate(string path)
         {
-            if(!Instance)
-                Debug.LogError("__Injector--: TransformMover: \r\n Instance Not Initialized!");
+            if (!Instance)
+                return;
             Instance.TransformPath = path;
             Instance.Activate();
         }

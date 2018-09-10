@@ -8,9 +8,9 @@ namespace Payload.MonoScript
         private bool Active = true;
         private bool IsTriggerOnly = true;
 
-        private KeyCode Switch = KeyCode.End;
-        private KeyCode DrawDistInc = KeyCode.PageUp;
-        private KeyCode DrawDistDec = KeyCode.PageDown;
+        private KeyCode Switch = KeyCode.Insert;
+        private KeyCode DrawDistInc = KeyCode.End;
+        private KeyCode DrawDistDec = KeyCode.Delete;
 
         private Rect HierRect = new Rect(Screen.width * 0.02f, Screen.height * 0.02f, Screen.width * 0.3f, Screen.height*0.96f);
         private Vector2 ScrollPosition = new Vector2();

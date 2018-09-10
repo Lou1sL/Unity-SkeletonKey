@@ -6,11 +6,34 @@ using UnityEngine;
 
 namespace Payload.MonoScript
 {
-    public class GUIStyles
+    public static class InjectDebug
+    {
+        private const string prefix = "__Injector--: ";
+        public static void InjectLog(this MonoBehaviour mono, string msg)
+        {
+            Debug.Log(prefix + mono.GetType().Name+":\r\n"+msg);
+        }
+        public static void InjectLogWarning(this MonoBehaviour mono, string msg)
+        {
+            Debug.LogWarning(prefix + mono.GetType().Name + ":\r\n" + msg);
+        }
+        public static void InjectLogError(this MonoBehaviour mono, string msg, Exception e = null)
+        {
+            string trace = string.Empty;
+            if (e != null)
+            {
+                trace = "\r\n" + e.Message + "\r\n" + e.StackTrace;
+            }
+            Debug.LogError(prefix + mono.GetType().Name + ":\r\n" + msg + trace);
+        }
+    }
+
+    public static class GUIStyles
     {
         public static readonly GUIStyle DEFAULT_LABEL = new GUIStyle(GUI.skin.label) { fontSize = 13 };
         public static readonly GUIStyle DEFAULT_WINDOW = new GUIStyle(GUI.skin.window) { fontSize = 15 };
     }
+
     public static class WindowID
     {
         public const int CONSOLE                            = 0x00;
@@ -24,7 +47,7 @@ namespace Payload.MonoScript
     public static class Utils
     {
 
-        public static string Vec2Str(Vector3 v3)
+        public static string Vec32Str(Vector3 v3)
         {
             return " X:" + Rnd(v3.x) + " Y:" + Rnd(v3.y) + " Z:" + Rnd(v3.z);
         }

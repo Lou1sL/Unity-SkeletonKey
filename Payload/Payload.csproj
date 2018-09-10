@@ -64,7 +64,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Main.cs" />
-    <Compile Include="MonoScript\FreeMainCamera.cs" />
+    <Compile Include="MonoScript\FreeCamera.cs" />
     <Compile Include="MonoScript\GameStatistic.cs" />
     <Compile Include="MonoScript\TransformModifier.cs" />
     <Compile Include="MonoScript\ColliderDrawer.cs" />

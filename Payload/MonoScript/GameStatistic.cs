@@ -8,7 +8,7 @@ namespace Payload.MonoScript
     {
 
         private bool Active = true;
-        private KeyCode Switch = KeyCode.Delete;
+        private KeyCode Switch = KeyCode.PageUp;
 
         private Rect WindowRect = new Rect(Screen.width * 0.66f, Screen.height * 0.02f, Screen.width * 0.32f, Screen.height * 0.48f);
         private Vector2 ScrollPosition = new Vector2();
@@ -40,19 +40,29 @@ namespace Payload.MonoScript
                     {
                         TransformModifier.Activate(Utils.GetGameObjectPath(cam.gameObject));
                     }
-                    GUILayout.Label((cam == Camera.main ? "Main" : "") + "Camera: " + Utils.GetGameObjectPath(cam.gameObject), GUIStyles.DEFAULT_LABEL);
+
+                    if (!cam.GetComponent<FreeCamera>())
+                    {
+                        if (GUILayout.Button("FREE", GUILayout.Width(60)))
+                        {
+                            foreach (Camera cams in Camera.allCameras)
+                            {
+                                FreeCamera fc = cams.GetComponent<FreeCamera>();
+                                if (fc) DestroyImmediate(fc);
+                            }
+                            cam.gameObject.AddComponent<FreeCamera>();
+                        }
+                    }
+                    GUILayout.Label((cam == Camera.main ? "(Main)" : "") + Utils.GetGameObjectPath(cam.gameObject), GUIStyles.DEFAULT_LABEL);
                     GUILayout.EndHorizontal();
 
 
                     string camstr = string.Empty;
-                    camstr += "    Projection:" +
+                    camstr += "Projection:" +
                         (cam.orthographic ?
                         "Orthographic (Size:" + cam.orthographicSize + ")" :
                         "Perspective (Fov:" + cam.fieldOfView + ")")
                         + "\n";
-
-                    camstr += "    Position:" + Utils.Vec2Str(cam.transform.position) + "\n";
-                    camstr += "    EularAng:" + Utils.Vec2Str(cam.transform.eulerAngles) + "\n";
                     GUILayout.Label(camstr, GUIStyles.DEFAULT_LABEL);
                 }
 
