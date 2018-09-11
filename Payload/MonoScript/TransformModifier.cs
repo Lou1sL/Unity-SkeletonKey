@@ -22,10 +22,9 @@ namespace Payload.MonoScript
         private Transform TargetTransform;
         private MonoBehaviour TargetComponent;
 
-        private Rect PathInputerRect = new Rect(Screen.width * 0.35f, Screen.height * 0.02f, Screen.width * 0.3f, 20);
+        
 
-        private Rect CompoRect = new Rect(Screen.width * 0.34f, Screen.height * 0.02f, Screen.width * 0.3f, Screen.height * 0.4f);
-        private Rect PropRect = new Rect(Screen.width * 0.34f, Screen.height * 0.42f, Screen.width * 0.3f, Screen.height * 0.56f);
+        
 
         private Vector2 ScrollPosition = new Vector2();
         private Vector2 ScrollPositionProp = new Vector2();
@@ -138,7 +137,7 @@ namespace Payload.MonoScript
 
         private void OnGUIComponentWindow()
         {
-            GUILayout.Window(WindowID.TRANSFORM_MODIFIER_COMPONENT_LIST, CompoRect, (id) =>
+            GUILayout.Window(WindowID.TRANSFORM_MODIFIER_COMPONENT_LIST, AllRect.CompoRect, (id) =>
             {
                 GUILayout.BeginHorizontal();
                 GUILayout.Label("MoveSpd(0-500)");
@@ -164,18 +163,18 @@ namespace Payload.MonoScript
                     {
                         Destroy(mb);
                     }
-                    GUILayout.Label(mb.GetType().Name, GUIStyles.DEFAULT_LABEL);
+                    GUILayout.Label(mb.GetType().Name, AllGUIStyle.DEFAULT_LABEL);
                     GUILayout.EndHorizontal();
                 }
 
                 GUILayout.EndVertical();
                 GUILayout.EndScrollView();
 
-            }, "Components On " + Utils.GetGameObjectPath(TargetTransform.gameObject), GUIStyles.DEFAULT_WINDOW);
+            }, "Components On " + Utils.GetGameObjectPath(TargetTransform.gameObject), AllGUIStyle.DEFAULT_WINDOW);
         }
         private void OnGUIPropertyWindow()
         {
-            GUILayout.Window(WindowID.TRANSFORM_MODIFIER_PROPERTIES_LIST, PropRect, (id) =>
+            GUILayout.Window(WindowID.TRANSFORM_MODIFIER_PROPERTIES_LIST, AllRect.PropRect, (id) =>
             {
                 TargetComponent.enabled = (GUILayout.Toggle(TargetComponent.enabled, "Enabled"));
                 ScrollPositionProp = GUILayout.BeginScrollView(ScrollPositionProp);
@@ -191,7 +190,7 @@ namespace Payload.MonoScript
                         if (prop.CanRead)
                         {
                             object val = prop.GetValue(TargetComponent, null);
-                            GUILayout.Label(prop.Name + "(" + prop.PropertyType.Name + ") : " + val, GUIStyles.DEFAULT_LABEL);
+                            GUILayout.Label(prop.Name + "(" + prop.PropertyType.Name + ") : " + val, AllGUIStyle.DEFAULT_LABEL);
                             if (prop.CanWrite)
                             {
                                 if (prop.PropertyType == typeof(bool))
@@ -208,7 +207,7 @@ namespace Payload.MonoScript
                         }
                         else
                         {
-                            GUILayout.Label(prop.Name + "(" + prop.PropertyType.Name + ") : __UNREADABLE", GUIStyles.DEFAULT_LABEL);
+                            GUILayout.Label(prop.Name + "(" + prop.PropertyType.Name + ") : __UNREADABLE", AllGUIStyle.DEFAULT_LABEL);
                         }
                     }
                     catch (Exception e)
@@ -224,11 +223,11 @@ namespace Payload.MonoScript
                 GUILayout.EndVertical();
                 GUILayout.EndScrollView();
 
-            }, "Properties On " + TargetComponent.GetType().Name, GUIStyles.DEFAULT_WINDOW);
+            }, "Properties On " + TargetComponent.GetType().Name, AllGUIStyle.DEFAULT_WINDOW);
         }
         private void OnGUITransformPathInput()
         {
-            TransformPath = GUI.TextField(PathInputerRect, TransformPath);
+            TransformPath = GUI.TextField(AllRect.PathInputerRect, TransformPath);
         }
         
         public static void Activate(string path)

@@ -28,7 +28,7 @@ namespace Payload.MonoScript
         }
     }
 
-    public static class GUIStyles
+    public static class AllGUIStyle
     {
         public static readonly GUIStyle DEFAULT_LABEL = new GUIStyle(GUI.skin.label) { fontSize = 13 };
         public static readonly GUIStyle DEFAULT_WINDOW = new GUIStyle(GUI.skin.window) { fontSize = 15 };
@@ -41,6 +41,20 @@ namespace Payload.MonoScript
         public const int TRANSFORM_WITH_TRIGGER_LIST        = 0x02;
         public const int TRANSFORM_MODIFIER_COMPONENT_LIST  = 0x03;
         public const int TRANSFORM_MODIFIER_PROPERTIES_LIST = 0x04;
+        public const int FREE_CAM_VALUES                    = 0x05;
+    }
+
+    public static class AllRect
+    {
+        public static readonly Rect HierRect         = new Rect(Screen.width * 0.02f, Screen.height * 0.02f, Screen.width * 0.30f, Screen.height * 0.96f);
+
+        public static readonly Rect PathInputerRect  = new Rect(Screen.width * 0.34f, Screen.height * 0.02f, Screen.width * 0.3f, 20);
+        public static readonly Rect CompoRect        = new Rect(Screen.width * 0.34f, Screen.height * 0.02f, Screen.width * 0.3f, Screen.height * 0.40f);
+        public static readonly Rect PropRect         = new Rect(Screen.width * 0.34f, Screen.height * 0.42f, Screen.width * 0.3f, Screen.height * 0.56f);
+        
+        public static readonly Rect StatisticRect    = new Rect(Screen.width * 0.66f, Screen.height * 0.02f, Screen.width * 0.32f, Screen.height * 0.44f);
+        public static readonly Rect FreeCamRect      = new Rect(Screen.width * 0.66f, Screen.height * 0.48f, Screen.width * 0.32f, Screen.height * 0.10f);
+        public static readonly Rect ConsoleRect      = new Rect(Screen.width * 0.34f, Screen.height * 0.60f, Screen.width * 0.64f, Screen.height * 0.38f);
     }
 
 
@@ -81,9 +95,9 @@ namespace Payload.MonoScript
             vpMatrix.SetColumn(2, new Vector4(0, 0, 1, 0));
             return vpMatrix.inverse * viewportMatrix;
         }
-        public static Vector2 ScreenToWorldPointPerspective(Vector2 point)
+        public static Vector2 ScreenToWorldPointPerspective(Vector2 point,Camera camera)
         {
-            return ScreenToWorldMatrix(Camera.main).MultiplyPoint(point);
+            return ScreenToWorldMatrix(camera).MultiplyPoint(point);
         }
 
     }

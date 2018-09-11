@@ -13,18 +13,8 @@ namespace Payload.MonoScript
             gameObject.AddComponent<Console>();
             gameObject.AddComponent<GameStatistic>();
             gameObject.AddComponent<TransformModifier>();
-            Camera.main.gameObject.AddComponent<FreeCamera>();
+            //Camera.main.gameObject.AddComponent<FreeCamera>();
             //gameObject.AddComponent<InjectAssetBundle>();
-
-            RefreshCamScript();
-        }
-
-        private void RefreshCamScript()
-        {
-            if (!Camera.main.gameObject.GetComponent<ColliderDrawer>())
-                Camera.main.gameObject.AddComponent<ColliderDrawer>();
-
-            Invoke("RefreshCamScript", 3f);
         }
         
     }

@@ -9,7 +9,7 @@ namespace Payload.MonoScript
         private bool Active = true;
         private KeyCode Switch = KeyCode.PageDown;
 
-        private Rect ConsoleRect = new Rect(Screen.width * 0.34f, Screen.height * 0.6f, Screen.width * 0.64f, Screen.height * 0.38f);
+        
         private Vector2 ScrollPosition = new Vector2();
 
 
@@ -109,7 +109,7 @@ namespace Payload.MonoScript
         private void OnGUI()
         {
             if (!Active) return;
-            GUILayout.Window(WindowID.CONSOLE, ConsoleRect, (id) =>
+            GUILayout.Window(WindowID.CONSOLE, AllRect.ConsoleRect, (id) =>
             {
                 GUILayout.BeginHorizontal();
                 logBuffer.ShowLog = GUILayout.Toggle(logBuffer.ShowLog, "Log");
@@ -119,7 +119,7 @@ namespace Payload.MonoScript
                 GUILayout.EndHorizontal();
 
                 ScrollPosition = GUILayout.BeginScrollView(ScrollPosition);
-                GUILayout.Label(logBuffer.ToString(), GUIStyles.DEFAULT_LABEL);
+                GUILayout.Label(logBuffer.ToString(), AllGUIStyle.DEFAULT_LABEL);
                 GUILayout.EndScrollView();
 
 
@@ -128,7 +128,7 @@ namespace Payload.MonoScript
                 if (GUILayout.Button("Close", GUILayout.Height(20))) Active = false;
                 GUILayout.EndHorizontal();
 
-            }, "Unity Console", GUIStyles.DEFAULT_WINDOW);
+            }, "Unity Console", AllGUIStyle.DEFAULT_WINDOW);
         }
         private void Update()
         {

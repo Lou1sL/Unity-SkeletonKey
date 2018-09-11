@@ -10,14 +10,14 @@ namespace Payload.MonoScript
         private bool Active = true;
         private KeyCode Switch = KeyCode.PageUp;
 
-        private Rect WindowRect = new Rect(Screen.width * 0.66f, Screen.height * 0.02f, Screen.width * 0.32f, Screen.height * 0.48f);
+        
         private Vector2 ScrollPosition = new Vector2();
 
         private void OnGUI()
         {
             if (!Active) return;
             
-            GUILayout.Window(WindowID.GAME_STATISTIC, WindowRect, (id) =>
+            GUILayout.Window(WindowID.GAME_STATISTIC, AllRect.StatisticRect, (id) =>
             {
                 ScrollPosition = GUILayout.BeginScrollView(ScrollPosition);
                 GUILayout.BeginVertical();
@@ -29,21 +29,26 @@ namespace Payload.MonoScript
                 //Before Unity 5.3
                 str += "Current Scene: (" + Application.loadedLevel + ") " + Application.loadedLevelName + "\n\n";
                 str += "Cameras (Total:" + Camera.allCamerasCount + "):\n";
-                GUILayout.Label(str, GUIStyles.DEFAULT_LABEL);
+                GUILayout.Label(str, AllGUIStyle.DEFAULT_LABEL);
 
 
                 foreach (Camera cam in Camera.allCameras)
                 {
+
                     GUILayout.BeginHorizontal();
-                    
                     if (GUILayout.Button("□", GUILayout.Width(20)))
                     {
                         TransformModifier.Activate(Utils.GetGameObjectPath(cam.gameObject));
                     }
+                    GUILayout.Label((cam == Camera.main ? "(Main)" : "") + Utils.GetGameObjectPath(cam.gameObject), AllGUIStyle.DEFAULT_LABEL);
+                    GUILayout.EndHorizontal();
 
+
+
+                    GUILayout.BeginHorizontal();
                     if (!cam.GetComponent<FreeCamera>())
                     {
-                        if (GUILayout.Button("FREE", GUILayout.Width(60)))
+                        if (GUILayout.Button("Free", GUILayout.Width(60)))
                         {
                             foreach (Camera cams in Camera.allCameras)
                             {
@@ -53,9 +58,19 @@ namespace Payload.MonoScript
                             cam.gameObject.AddComponent<FreeCamera>();
                         }
                     }
-                    GUILayout.Label((cam == Camera.main ? "(Main)" : "") + Utils.GetGameObjectPath(cam.gameObject), GUIStyles.DEFAULT_LABEL);
+                    if (!cam.GetComponent<ColliderDrawer>())
+                    {
+                        if (GUILayout.Button("DrawCollider", GUILayout.Width(120)))
+                        {
+                            foreach (Camera cams in Camera.allCameras)
+                            {
+                                ColliderDrawer cd = cams.GetComponent<ColliderDrawer>();
+                                if (cd) DestroyImmediate(cd);
+                            }
+                            cam.gameObject.AddComponent<ColliderDrawer>();
+                        }
+                    }
                     GUILayout.EndHorizontal();
-
 
                     string camstr = string.Empty;
                     camstr += "Projection:" +
@@ -63,13 +78,13 @@ namespace Payload.MonoScript
                         "Orthographic (Size:" + cam.orthographicSize + ")" :
                         "Perspective (Fov:" + cam.fieldOfView + ")")
                         + "\n";
-                    GUILayout.Label(camstr, GUIStyles.DEFAULT_LABEL);
+                    GUILayout.Label(camstr, AllGUIStyle.DEFAULT_LABEL);
                 }
 
                 
                 GUILayout.EndVertical();
                 GUILayout.EndScrollView();
-            }, "Game Statistic", GUIStyles.DEFAULT_WINDOW);
+            }, "Game Statistic", AllGUIStyle.DEFAULT_WINDOW);
         }
 
         private void Update()

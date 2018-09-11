@@ -14,7 +14,7 @@ namespace Payload.MonoScript
         private Quaternion NewRotation;
 
         public float RotationSpeed = 1f;
-        public float MoveSpeed = 200f;
+        public float MoveSpeed = 50f;
 
 
         private float xDeg = 0.0f;
@@ -76,11 +76,20 @@ namespace Payload.MonoScript
         private void OnGUI()
         {
             if (!Active) return;
-            Color color = GUI.color;
-            GUI.color = new Color(1, 1, 1, 0.5f);
-            GUI.Label(new Rect(Screen.width * 0.5f, Screen.height * 0.5f, 120f, 20), "Free Camera");
-            GUI.color = color;
 
+            GUILayout.Window(WindowID.FREE_CAM_VALUES, AllRect.FreeCamRect, (id) =>
+            {
+                GUILayout.BeginHorizontal();
+                GUILayout.Label("Mov Speed:");
+                MoveSpeed = GUILayout.HorizontalSlider(MoveSpeed, 0f, 200f);
+                GUILayout.EndHorizontal();
+
+                GUILayout.BeginHorizontal();
+                GUILayout.Label("Rot Speed:");
+                RotationSpeed = GUILayout.HorizontalSlider(RotationSpeed, 0f, 1f);
+                GUILayout.EndHorizontal();
+
+            }, "Free Camera", AllGUIStyle.DEFAULT_WINDOW);
         }
     }
 }

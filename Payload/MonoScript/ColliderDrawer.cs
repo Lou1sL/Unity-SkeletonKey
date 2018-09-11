@@ -12,7 +12,7 @@ namespace Payload.MonoScript
         private KeyCode DrawDistInc = KeyCode.End;
         private KeyCode DrawDistDec = KeyCode.Delete;
 
-        private Rect HierRect = new Rect(Screen.width * 0.02f, Screen.height * 0.02f, Screen.width * 0.3f, Screen.height*0.96f);
+        
         private Vector2 ScrollPosition = new Vector2();
 
 
@@ -43,20 +43,16 @@ namespace Payload.MonoScript
         }
         private Vector3[] GetCollider2DVertexPositions(Collider2D c2d)
         {
-            var vertices = new Vector3[8];
+            var vertices = new Vector3[4];
             var thisMatrix = c2d.transform.localToWorldMatrix;
             var storedRotation = c2d.transform.rotation;
             c2d.transform.rotation = Quaternion.identity;
 
             var extents = c2d.bounds.extents;
             vertices[0] = thisMatrix.MultiplyPoint3x4(extents);
-            vertices[1] = thisMatrix.MultiplyPoint3x4(new Vector3(-extents.x, extents.y, extents.z));
-            vertices[2] = thisMatrix.MultiplyPoint3x4(new Vector3(extents.x, extents.y, -extents.z));
-            vertices[3] = thisMatrix.MultiplyPoint3x4(new Vector3(-extents.x, extents.y, -extents.z));
-            vertices[4] = thisMatrix.MultiplyPoint3x4(new Vector3(extents.x, -extents.y, extents.z));
-            vertices[5] = thisMatrix.MultiplyPoint3x4(new Vector3(-extents.x, -extents.y, extents.z));
-            vertices[6] = thisMatrix.MultiplyPoint3x4(new Vector3(extents.x, -extents.y, -extents.z));
-            vertices[7] = thisMatrix.MultiplyPoint3x4(-extents);
+            vertices[1] = thisMatrix.MultiplyPoint3x4(new Vector3(-extents.x, extents.y, 0));
+            vertices[2] = thisMatrix.MultiplyPoint3x4(new Vector3(extents.x, -extents.y, 0));
+            vertices[3] = thisMatrix.MultiplyPoint3x4(new Vector3(-extents.x, -extents.y, 0));
 
             c2d.transform.rotation = storedRotation;
             return vertices;
@@ -106,49 +102,28 @@ namespace Payload.MonoScript
         private void DrawVertex2D(Vector3[] v)
         {
             //UP
-            GL.Vertex3(v[0].x, v[0].y, v[0].z);
-            GL.Vertex3(v[1].x, v[1].y, v[1].z);
-
-            GL.Vertex3(v[1].x, v[1].y, v[1].z);
-            GL.Vertex3(v[3].x, v[3].y, v[3].z);
-
-            GL.Vertex3(v[3].x, v[3].y, v[3].z);
-            GL.Vertex3(v[2].x, v[2].y, v[2].z);
-
-            GL.Vertex3(v[2].x, v[2].y, v[2].z);
-            GL.Vertex3(v[0].x, v[0].y, v[0].z);
+            GL.Vertex3(v[0].x, v[0].y, 0);
+            GL.Vertex3(v[1].x, v[1].y, 0);
 
             //SIDE
-            GL.Vertex3(v[0].x, v[0].y, v[0].z);
-            GL.Vertex3(v[4].x, v[4].y, v[4].z);
+            GL.Vertex3(v[0].x, v[0].y, 0);
+            GL.Vertex3(v[2].x, v[2].y, 0);
 
-            GL.Vertex3(v[1].x, v[1].y, v[1].z);
-            GL.Vertex3(v[5].x, v[5].y, v[5].z);
-
-            GL.Vertex3(v[3].x, v[3].y, v[3].z);
-            GL.Vertex3(v[7].x, v[7].y, v[7].z);
-
-            GL.Vertex3(v[2].x, v[2].y, v[2].z);
-            GL.Vertex3(v[6].x, v[6].y, v[6].z);
+            GL.Vertex3(v[1].x, v[1].y, 0);
+            GL.Vertex3(v[3].x, v[3].y, 0);
 
             //BOTTOM
-            GL.Vertex3(v[4].x, v[4].y, v[4].z);
-            GL.Vertex3(v[5].x, v[5].y, v[5].z);
-
-            GL.Vertex3(v[5].x, v[5].y, v[5].z);
-            GL.Vertex3(v[7].x, v[7].y, v[7].z);
-
-            GL.Vertex3(v[7].x, v[7].y, v[7].z);
-            GL.Vertex3(v[6].x, v[6].y, v[6].z);
-
-            GL.Vertex3(v[6].x, v[6].y, v[6].z);
-            GL.Vertex3(v[4].x, v[4].y, v[4].z);
+            GL.Vertex3(v[2].x, v[2].y, 0);
+            GL.Vertex3(v[3].x, v[3].y, 0);
         }
 
         private Material lineMat;
 
+        private new Camera camera;
         private void Start()
         {
+            camera = GetComponent<Camera>();
+
             //TODO:May not included in build
             lineMat = new Material(Shader.Find("Hidden/Internal-Colored"));
             lineMat.SetInt("_ZTest", (int)UnityEngine.Rendering.CompareFunction.Disabled);
@@ -237,7 +212,7 @@ namespace Payload.MonoScript
 
                     if (c2d)
                     {
-                        if (Vector2.Distance(go.transform.position, transform.position) <= DrawDistance && ((IsTriggerOnly && c.isTrigger) || (!IsTriggerOnly)))
+                        if (Vector2.Distance(go.transform.position, transform.position) <= DrawDistance && ((IsTriggerOnly && c2d.isTrigger) || (!IsTriggerOnly)))
                         {
                             Trigger2DHashSet.Add(c2d);
                         }
@@ -258,7 +233,7 @@ namespace Payload.MonoScript
             if (!Active) return;
             GUI.Label(new Rect(Input.mousePosition.x, Screen.height - Input.mousePosition.y, Screen.width, Screen.height),"<color=#00FF00>"+AimingObjName+"</color>");
             
-            GUILayout.Window(WindowID.TRANSFORM_WITH_TRIGGER_LIST, HierRect, (id) =>
+            GUILayout.Window(WindowID.TRANSFORM_WITH_TRIGGER_LIST, AllRect.HierRect, (id) =>
             {
                 GUILayout.BeginHorizontal();
                 IsTriggerOnly = GUILayout.Toggle(IsTriggerOnly, "IsTriggerOnly");
@@ -276,7 +251,7 @@ namespace Payload.MonoScript
                     {
                         TransformModifier.Activate(str);
                     }
-                    GUILayout.Label(str, GUIStyles.DEFAULT_LABEL);
+                    GUILayout.Label(str, AllGUIStyle.DEFAULT_LABEL);
                     GUILayout.EndHorizontal();
                 }
                 foreach (Collider2D t2d in Trigger2DHashSet)
@@ -287,12 +262,12 @@ namespace Payload.MonoScript
                     {
                         TransformModifier.Activate(str);
                     }
-                    GUILayout.Label(str, GUIStyles.DEFAULT_LABEL);
+                    GUILayout.Label(str, AllGUIStyle.DEFAULT_LABEL);
                     GUILayout.EndHorizontal();
                 }
                 GUILayout.EndVertical();
                 GUILayout.EndScrollView();
-            }, "Trigger Hierarchy", GUIStyles.DEFAULT_WINDOW);
+            }, "Trigger Hierarchy", AllGUIStyle.DEFAULT_WINDOW);
         }
         
         private string AimingObjName = string.Empty;
@@ -301,7 +276,7 @@ namespace Payload.MonoScript
             AimingObjName = string.Empty;
             if (!Active) return;
 
-            RaycastHit[] hits = Physics.RaycastAll(Camera.main.ScreenPointToRay(Input.mousePosition), DrawDistance);
+            RaycastHit[] hits = Physics.RaycastAll(camera.ScreenPointToRay(Input.mousePosition), DrawDistance);
             foreach (RaycastHit hit in hits)
             {
                 if ((IsTriggerOnly && hit.collider.isTrigger) || (!IsTriggerOnly))
@@ -313,8 +288,8 @@ namespace Payload.MonoScript
 
             RaycastHit2D[] hit2ds = new RaycastHit2D[0];
             
-            if (Camera.main.orthographic) hit2ds = Physics2D.RaycastAll(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
-            else hit2ds = Physics2D.RaycastAll(Utils.ScreenToWorldPointPerspective(Input.mousePosition), Vector2.zero);
+            if (camera.orthographic) hit2ds = Physics2D.RaycastAll(camera.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
+            else hit2ds = Physics2D.RaycastAll(Utils.ScreenToWorldPointPerspective(Input.mousePosition,camera), Vector2.zero);
             foreach (RaycastHit2D hit2d in hit2ds)
             {
                 if (hit2d)
