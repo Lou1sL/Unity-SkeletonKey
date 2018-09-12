@@ -66,6 +66,7 @@
     <Compile Include="Main.cs" />
     <Compile Include="MonoScript\FreeCamera.cs" />
     <Compile Include="MonoScript\GameStatistic.cs" />
+    <Compile Include="MonoScript\EngineToolBase.cs" />
     <Compile Include="MonoScript\TransformModifier.cs" />
     <Compile Include="MonoScript\ColliderDrawer.cs" />
     <Compile Include="MonoScript\Console.cs" />
@@ -74,5 +75,6 @@
     <Compile Include="MonoScript\Utils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
