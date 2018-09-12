@@ -267,6 +267,9 @@ namespace Payload.MonoScript
                 }
                 GUILayout.EndVertical();
                 GUILayout.EndScrollView();
+
+                if (GUILayout.Button("Close", GUILayout.Height(20))) Active = false;
+
             }, "Trigger Hierarchy", AllGUIStyle.DEFAULT_WINDOW);
         }
         

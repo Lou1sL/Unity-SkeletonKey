@@ -11,7 +11,7 @@ namespace Payload.MonoScript
     {
         
 
-        private bool IsActive = false;
+        private bool Active = false;
 
         private KeyCode Switch = KeyCode.Home;
         private KeyCode MvSpdInc = KeyCode.End;
@@ -39,13 +39,13 @@ namespace Payload.MonoScript
         {
             if (Input.GetKeyDown(Switch))
             {
-                if (IsActive)
+                if (Active)
                     DeActivate();
                 else
                     Activate();
             }
 
-            if (IsActive)
+            if (Active)
             {
                 MvSpdModify();
 
@@ -61,7 +61,7 @@ namespace Payload.MonoScript
 
         private void DeActivate()
         {
-            IsActive = false;
+            Active = false;
             TargetTransform = null;
             TargetComponent = null;
         }
@@ -71,7 +71,7 @@ namespace Payload.MonoScript
 
             if (go)
             {
-                IsActive = true;
+                Active = true;
                 TargetTransform = go.transform;
                 TargetComponent = null;
             }
@@ -79,7 +79,7 @@ namespace Payload.MonoScript
             {
                 this.InjectLogError("GameObject Not Found!Are you sure you entered the right path?");
 
-                IsActive = false;
+                Active = false;
                 TargetTransform = null;
                 TargetComponent = null;
             }
@@ -121,7 +121,7 @@ namespace Payload.MonoScript
         private string TransformPath = string.Empty;
         private void OnGUI()
         {
-            if (IsActive)
+            if (Active)
             {
                 if (TargetTransform)
                 {
@@ -169,6 +169,8 @@ namespace Payload.MonoScript
 
                 GUILayout.EndVertical();
                 GUILayout.EndScrollView();
+
+                if (GUILayout.Button("Close", GUILayout.Height(20))) Active = false;
 
             }, "Components On " + Utils.GetGameObjectPath(TargetTransform.gameObject), AllGUIStyle.DEFAULT_WINDOW);
         }
@@ -222,6 +224,8 @@ namespace Payload.MonoScript
 
                 GUILayout.EndVertical();
                 GUILayout.EndScrollView();
+
+                if (GUILayout.Button("Close", GUILayout.Height(20))) Active = false;
 
             }, "Properties On " + TargetComponent.GetType().Name, AllGUIStyle.DEFAULT_WINDOW);
         }
