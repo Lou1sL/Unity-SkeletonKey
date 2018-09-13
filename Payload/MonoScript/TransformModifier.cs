@@ -23,9 +23,7 @@ namespace Payload.MonoScript
         private MonoBehaviour TargetComponent;
 
         
-
         
-
         private Vector2 ScrollPosition = new Vector2();
         private Vector2 ScrollPositionProp = new Vector2();
 
@@ -170,7 +168,7 @@ namespace Payload.MonoScript
                 GUILayout.EndVertical();
                 GUILayout.EndScrollView();
 
-                if (GUILayout.Button("Close", GUILayout.Height(20))) Active = false;
+                if (GUILayout.Button("Close", GUILayout.Height(20))) DeActivate();
 
             }, "Components On " + Utils.GetGameObjectPath(TargetTransform.gameObject), AllGUIStyle.DEFAULT_WINDOW);
         }
@@ -225,7 +223,7 @@ namespace Payload.MonoScript
                 GUILayout.EndVertical();
                 GUILayout.EndScrollView();
 
-                if (GUILayout.Button("Close", GUILayout.Height(20))) Active = false;
+                if (GUILayout.Button("Close", GUILayout.Height(20))) TargetComponent = null;
 
             }, "Properties On " + TargetComponent.GetType().Name, AllGUIStyle.DEFAULT_WINDOW);
         }
@@ -234,12 +232,14 @@ namespace Payload.MonoScript
             TransformPath = GUI.TextField(AllRect.PathInputerRect, TransformPath);
         }
         
-        public static void Activate(string path)
+        public static void Activate(Transform transform)
         {
             if (!Instance)
                 return;
-            Instance.TransformPath = path;
-            Instance.Activate();
+            Instance.TransformPath = string.Empty;
+            Instance.Active = true;
+            Instance.TargetTransform = transform;
+            Instance.TargetComponent = null;
         }
     }
 }

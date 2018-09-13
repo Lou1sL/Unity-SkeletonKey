@@ -15,10 +15,6 @@ namespace Payload.MonoScript
 
         public float RotationSpeed = 1f;
         public float MoveSpeed = 50f;
-
-
-        private float xDeg = 0.0f;
-        private float yDeg = 0.0f;
         
 
         void Update()
@@ -27,52 +23,46 @@ namespace Payload.MonoScript
             {
                 if (Active)
                 {
-                    transform.position = DefaultPosition;
-                    transform.rotation = DefaultRotation;
-                    Active = false;
+                    DeActivate();
                 }
                 else
                 {
-                    DefaultPosition = transform.position;
-                    DefaultRotation = transform.rotation;
-
-                    NewPosition = transform.position;
-                    NewRotation = transform.rotation;
-
-                    xDeg = Vector3.Angle(Vector3.right, transform.right);
-                    yDeg = Vector3.Angle(Vector3.up, transform.up);
-                    Active = true;
+                    Activate();
                 }
             }
 
             if (!Active) return;
 
-            transform.position = NewPosition;
-            transform.rotation = NewRotation;
-
-
             xDeg += Input.GetAxis("Mouse X") * RotationSpeed;
             yDeg -= Input.GetAxis("Mouse Y") * RotationSpeed;
             yDeg = Utils.ClampAngle(yDeg, -80, 80);
 
-            transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(yDeg, xDeg, 0), Time.deltaTime * 5f);
-
-
-            float spd = 0f;
-
+            spd = 0f;
             if (Input.GetMouseButton(0))
                 spd = MoveSpeed;
             if (Input.GetMouseButton(1))
                 spd = -MoveSpeed;
             if (Input.GetKey(KeyCode.LeftShift))
                 spd *= 2f;
+        }
 
+        private float xDeg = 0.0f;
+        private float yDeg = 0.0f;
+        private float spd = 0f;
+        private void LateUpdate()
+        {
+            if (!Active) return;
+            transform.position = NewPosition;
+            transform.rotation = NewRotation;
+
+            transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(yDeg, xDeg, 0), Time.deltaTime * 5f);
             transform.position += transform.rotation * Vector3.forward * Time.deltaTime * spd;
 
             NewPosition = transform.position;
             NewRotation = transform.rotation;
         }
-        
+
+
         private void OnGUI()
         {
             if (!Active) return;
@@ -89,9 +79,35 @@ namespace Payload.MonoScript
                 RotationSpeed = GUILayout.HorizontalSlider(RotationSpeed, 0f, 1f);
                 GUILayout.EndHorizontal();
 
-                if (GUILayout.Button("Deactivate", GUILayout.Height(20))) Active = false;
+                if (GUILayout.Button("Deactivate", GUILayout.Height(20)))
+                {
+                    transform.position = DefaultPosition;
+                    transform.rotation = DefaultRotation;
+                    Active = false;
+                }
+                    
 
             }, "Free Camera", AllGUIStyle.DEFAULT_WINDOW);
+        }
+
+
+        void Activate()
+        {
+            DefaultPosition = transform.position;
+            DefaultRotation = transform.rotation;
+
+            NewPosition = transform.position;
+            NewRotation = transform.rotation;
+
+            xDeg = Vector3.Angle(Vector3.right, transform.right);
+            yDeg = Vector3.Angle(Vector3.up, transform.up);
+            Active = true;
+        }
+        void DeActivate()
+        {
+            transform.position = DefaultPosition;
+            transform.rotation = DefaultRotation;
+            Active = false;
         }
     }
 }

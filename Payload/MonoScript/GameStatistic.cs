@@ -1,9 +1,11 @@
-﻿using UnityEngine;
+﻿using System.Diagnostics.CodeAnalysis;
+using UnityEngine;
 //SceneManagement feture implemented after Unity 5.3(include)
 //using UnityEngine.SceneManagement;
 
 namespace Payload.MonoScript
 {
+    [SuppressMessage("Microsoft.Design", "CS0618")]
     public class GameStatistic : MonoBehaviour
     {
 
@@ -38,7 +40,7 @@ namespace Payload.MonoScript
                     GUILayout.BeginHorizontal();
                     if (GUILayout.Button("□", GUILayout.Width(20)))
                     {
-                        TransformModifier.Activate(Utils.GetGameObjectPath(cam.gameObject));
+                        TransformModifier.Activate(cam.transform);
                     }
                     GUILayout.Label((cam == Camera.main ? "(Main)" : "") + Utils.GetGameObjectPath(cam.gameObject), AllGUIStyle.DEFAULT_LABEL);
                     GUILayout.EndHorizontal();

@@ -246,29 +246,31 @@ namespace Payload.MonoScript
                 foreach (Collider t in TriggerHashSet)
                 {
                     GUILayout.BeginHorizontal();
-                    string str = Utils.GetGameObjectPath(t.gameObject);
                     if (GUILayout.Button("□",GUILayout.Width(20)))
                     {
-                        TransformModifier.Activate(str);
+                        TransformModifier.Activate(t.transform);
                     }
-                    GUILayout.Label(str, AllGUIStyle.DEFAULT_LABEL);
+                    GUILayout.Label(Utils.GetGameObjectPath(t.gameObject), AllGUIStyle.DEFAULT_LABEL);
                     GUILayout.EndHorizontal();
                 }
                 foreach (Collider2D t2d in Trigger2DHashSet)
                 {
                     GUILayout.BeginHorizontal();
-                    string str = Utils.GetGameObjectPath(t2d.gameObject);
                     if (GUILayout.Button("□", GUILayout.Width(20)))
                     {
-                        TransformModifier.Activate(str);
+                        TransformModifier.Activate(t2d.transform);
                     }
-                    GUILayout.Label(str, AllGUIStyle.DEFAULT_LABEL);
+                    GUILayout.Label(Utils.GetGameObjectPath(t2d.gameObject), AllGUIStyle.DEFAULT_LABEL);
                     GUILayout.EndHorizontal();
                 }
                 GUILayout.EndVertical();
                 GUILayout.EndScrollView();
 
-                if (GUILayout.Button("Close", GUILayout.Height(20))) Active = false;
+                if (GUILayout.Button("Close", GUILayout.Height(20)))
+                {
+                    Active = false;
+                    RefreshTriggerHashSet();
+                }
 
             }, "Trigger Hierarchy", AllGUIStyle.DEFAULT_WINDOW);
         }
