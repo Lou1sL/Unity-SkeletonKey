@@ -118,7 +118,8 @@ namespace Payload.MonoScript
         }
 
         private Material lineMat;
-
+        private string filter = string.Empty;
+        private bool filterCaseIgnore = true;
         private new Camera camera;
         private void Start()
         {
@@ -241,10 +242,16 @@ namespace Payload.MonoScript
                 DrawDistance = GUILayout.HorizontalSlider(DrawDistance, 0f, 500f);
                 GUILayout.EndHorizontal();
 
+                GUILayout.BeginHorizontal();
+                filter = GUILayout.TextField(filter);
+                filterCaseIgnore = GUILayout.Toggle(filterCaseIgnore, "Ignore case");
+                GUILayout.EndHorizontal();
+
                 ScrollPosition = GUILayout.BeginScrollView(ScrollPosition);
                 GUILayout.BeginVertical();
                 foreach (Collider t in TriggerHashSet)
                 {
+                    if (filter != string.Empty && (filterCaseIgnore?(t.gameObject.name.ToUpper().Contains(filter.ToUpper())) :(t.gameObject.name.Contains(filter)))) continue;
                     GUILayout.BeginHorizontal();
                     if (GUILayout.Button("□",GUILayout.Width(20)))
                     {
@@ -255,6 +262,7 @@ namespace Payload.MonoScript
                 }
                 foreach (Collider2D t2d in Trigger2DHashSet)
                 {
+                    if (filter != string.Empty && (filterCaseIgnore ? (t2d.gameObject.name.ToUpper().Contains(filter.ToUpper())) : (t2d.gameObject.name.Contains(filter)))) continue;
                     GUILayout.BeginHorizontal();
                     if (GUILayout.Button("□", GUILayout.Width(20)))
                     {
