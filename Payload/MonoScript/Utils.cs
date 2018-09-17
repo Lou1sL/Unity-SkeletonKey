@@ -105,43 +105,106 @@ namespace Payload.MonoScript
 
     public static class Reflector
     {
-        public static void DrawVarList(Component component)
-        {
 
-            List<PropertyInfo> props = new List<PropertyInfo>(component.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic));
-            List<FieldInfo> fields = new List<FieldInfo>(component.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic));
+        public enum VarCata
+        {
+            Field,
+            Property
+        }
+
+        public class VariableModifier
+        {
+            public Component component { get; private set; }
+            public List<PropertyInfo> props { get; private set; }
+            public List<FieldInfo> fields { get; private set; }
             //List<MethodInfo> methods = new List<MethodInfo>(mono.GetType().GetMethods());
 
-            GUILayout.BeginVertical();
-            foreach (PropertyInfo prop in props)
+            public List<object> propsModifyCache;
+            public List<object> fieldsModifyCache;
+
+            public VariableModifier(Component component)
             {
+                this.component = component;
+                props = new List<PropertyInfo>(component.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic));
+                fields = new List<FieldInfo>(component.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic));
+
+                propsModifyCache = new List<object>();
+                for (int i = 0; i < props.Count; i++)
+                {
+                    propsModifyCache.Add(props[i].CanRead?props[i].GetValue(component, null):"UNREADABLE");
+                }
+
+                fieldsModifyCache = new List<object>();
+                for (int i = 0; i < fields.Count; i++)
+                {
+                    fieldsModifyCache.Add(fields[i].GetValue(component));
+                }
+            }
+
+            public void UpdateCache(VarCata cata, int Pointer)
+            {
+                if (cata == VarCata.Property)
+                        propsModifyCache[Pointer] = props[Pointer].GetValue(component, null);
+
+                if (cata == VarCata.Field)
+                    fieldsModifyCache[Pointer] = fields[Pointer].GetValue(component);
+            }
+            public void Set(VarCata cata, int Pointer)
+            {
+                if (cata == VarCata.Property)
+                        props[Pointer].SetValue(component, propsModifyCache[Pointer], null);
+
+                if (cata == VarCata.Field)
+                    fields[Pointer].SetValue(component, fieldsModifyCache[Pointer]);
+            }
+        }
+
+        public static void DrawVarList(VariableModifier vm)
+        {
+            GUILayout.BeginVertical();
+
+
+            for (int i = 0; i < vm.props.Count; i++)
+            {
+                PropertyInfo prop = vm.props[i];
+
                 try
                 {
                     GUILayout.Label(prop.PropertyType.Name + " " + prop.Name);
                     if (prop.CanRead)
-                        GUILayout.Label("get: "+ prop.GetValue(component, null)+"");
-                    //if (prop.CanRead && prop.CanWrite)
-                        //prop.SetValue(component, VarEditBox(prop.PropertyType, prop.GetValue(component, null)), null);
+                        GUILayout.Label("Get: " + prop.GetValue(vm.component, null) + "");
+                    if (prop.CanRead && prop.CanWrite)
+                    {
+                        VarEditBox(vm, i, VarCata.Property);
+                    }
+
                 }
                 catch (Exception e)
                 {
-                    //TODO:...Damn
                     Debug.LogError(InjectDebug.prefix + "Something Went Wrong When Drawing Variables!" + "\r\n" + e.Message + "\r\n" + e.StackTrace);
                 }
+                
+                GUILayout.Label("");
             }
-            foreach (FieldInfo field in fields)
+            for (int i = 0; i < vm.fields.Count; i++)
             {
+                FieldInfo field = vm.fields[i];
+
                 try
                 {
-                    GUILayout.Label(FullFieldName(field) +" = " + field.GetValue(component));
-                    //field.SetValue(component, VarEditBox(field.FieldType, field.GetValue(component)));
+                    GUILayout.Label(FullFieldName(field) + " = " + field.GetValue(vm.component));
+                    VarEditBox(vm, i, VarCata.Field);
                 }
                 catch (Exception e)
                 {
-                    //TODO:...Damn
                     Debug.LogError(InjectDebug.prefix + "Something Went Wrong When Drawing Variables!" + "\r\n" + e.Message + "\r\n" + e.StackTrace);
                 }
+
+                GUILayout.Label("");
             }
+            
+
+
             GUILayout.EndVertical();
 
         }
@@ -155,20 +218,56 @@ namespace Payload.MonoScript
             return visit + (field.IsStatic ? "Static " : "") + field.FieldType.Name + " " + field.Name;
         }
 
-        private static object VarEditBox(Type t,object o)
+        private static void VarEditBox(VariableModifier vm,int i, VarCata cata)
         {
-            if (t == typeof(bool))
-                return GUILayout.Toggle((bool)o, "");
-            else if (t == typeof(int))
-                return Convert.ToInt32(GUILayout.TextField(((int)o) + ""));
-            else if (t == typeof(float))
-                return Convert.ToSingle(GUILayout.TextField(((float)o) + ""));
-            else if (t == typeof(double))
-                return Convert.ToDouble(GUILayout.TextField(((double)o) + ""));
-            else if (t == typeof(string))
-                return GUILayout.TextField((string)o);
+            GUILayout.BeginHorizontal();
+            
+            bool Editable = true;
 
-            return o;
+            Type t = null;
+            object o = null;
+            if (cata == VarCata.Field)
+            {
+                o = vm.fieldsModifyCache[i];
+                t = vm.fields[i].FieldType;
+            }
+            if (cata == VarCata.Property)
+            {
+                o = vm.propsModifyCache[i];
+                t = vm.props[i].PropertyType;
+            }
+            if (t == typeof(bool))
+                o = GUILayout.Toggle((bool)o, "");
+            else if (t == typeof(int))
+                o = Convert.ToInt32(GUILayout.TextField(((int)o) + ""));
+            else if (t == typeof(float))
+                o = Convert.ToSingle(GUILayout.TextField(((float)o) + ""));
+            else if (t == typeof(double))
+                o = Convert.ToDouble(GUILayout.TextField(((double)o) + ""));
+            else if (t == typeof(string))
+                o = GUILayout.TextField((string)o);
+            else Editable = false;
+
+            if (Editable)
+            {
+                if (GUILayout.Button("Update", GUILayout.Width(70)))
+                    //TODO:Not working!
+                    vm.UpdateCache(cata, i);
+
+                if (GUILayout.Button("Set", GUILayout.Width(40)))
+                    vm.Set(cata, i);
+
+                if (cata == VarCata.Field)
+                {
+                    vm.fieldsModifyCache[i] = o;
+                }
+                if (cata == VarCata.Property)
+                {
+                    vm.propsModifyCache[i] = o;
+                }
+            }
+
+            GUILayout.EndHorizontal();
         }
 
     }

@@ -20,8 +20,7 @@ namespace Payload.MonoScript
         private float MvSpd = 100f;
 
         private Transform TargetTransform;
-        private Component TargetComponent;
-
+        private Reflector.VariableModifier TargetComponentModifier;
         
         
         private Vector2 ScrollPosition = new Vector2();
@@ -61,7 +60,7 @@ namespace Payload.MonoScript
         {
             Active = false;
             TargetTransform = null;
-            TargetComponent = null;
+            TargetComponentModifier = null;
         }
         private void Activate()
         {
@@ -71,7 +70,7 @@ namespace Payload.MonoScript
             {
                 Active = true;
                 TargetTransform = go.transform;
-                TargetComponent = null;
+                TargetComponentModifier = null;
             }
             else
             {
@@ -79,7 +78,7 @@ namespace Payload.MonoScript
 
                 Active = false;
                 TargetTransform = null;
-                TargetComponent = null;
+                TargetComponentModifier = null;
             }
         }
         private void MvSpdModify()
@@ -124,7 +123,7 @@ namespace Payload.MonoScript
                 if (TargetTransform)
                 {
                     OnGUIComponentWindow();
-                    if (TargetComponent != null)
+                    if (TargetComponentModifier != null)
                         OnGUIPropertyWindow();
                 }
             }
@@ -155,11 +154,12 @@ namespace Payload.MonoScript
                     GUILayout.BeginHorizontal();
                     if (GUILayout.Button("□", GUILayout.Width(20)))
                     {
-                        TargetComponent = cp;
+                        TargetComponentModifier = new Reflector.VariableModifier(cp);
                     }
                     if (GUILayout.Button("RM", GUILayout.Width(40)))
                     {
                         Destroy(cp);
+                        TargetComponentModifier = null;
                     }
                     GUILayout.Label(cp.GetType().Name, AllGUIStyle.DEFAULT_LABEL);
                     GUILayout.EndHorizontal();
@@ -178,13 +178,15 @@ namespace Payload.MonoScript
             {
                 ScrollPositionProp = GUILayout.BeginScrollView(ScrollPositionProp);
 
-                Reflector.DrawVarList(TargetComponent);
+                Reflector.DrawVarList(TargetComponentModifier);
 
                 GUILayout.EndScrollView();
 
-                if (GUILayout.Button("Close")) TargetComponent = null;
-
-            }, "Var On " + TargetComponent.GetType().Name, AllGUIStyle.DEFAULT_WINDOW);
+                if (GUILayout.Button("Close"))
+                {
+                    TargetComponentModifier = null;
+                }
+            }, "Var On " + TargetComponentModifier.component.GetType().Name, AllGUIStyle.DEFAULT_WINDOW);
         }
         private void OnGUITransformPathInput()
         {
@@ -198,7 +200,7 @@ namespace Payload.MonoScript
             Instance.TransformPath = string.Empty;
             Instance.Active = true;
             Instance.TargetTransform = transform;
-            Instance.TargetComponent = null;
+            Instance.TargetComponentModifier = null;
         }
     }
 }
