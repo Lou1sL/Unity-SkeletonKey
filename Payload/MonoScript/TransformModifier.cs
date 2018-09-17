@@ -20,7 +20,7 @@ namespace Payload.MonoScript
         private float MvSpd = 100f;
 
         private Transform TargetTransform;
-        private MonoBehaviour TargetComponent;
+        private Component TargetComponent;
 
         
         
@@ -150,25 +150,25 @@ namespace Payload.MonoScript
                 ScrollPosition = GUILayout.BeginScrollView(ScrollPosition);
                 GUILayout.BeginVertical();
                 //
-                foreach (MonoBehaviour mb in TargetTransform.GetComponents<MonoBehaviour>())
+                foreach (Component cp in TargetTransform.GetComponents<Component>())
                 {
                     GUILayout.BeginHorizontal();
                     if (GUILayout.Button("□", GUILayout.Width(20)))
                     {
-                        TargetComponent = mb;
+                        TargetComponent = cp;
                     }
                     if (GUILayout.Button("RM", GUILayout.Width(40)))
                     {
-                        Destroy(mb);
+                        Destroy(cp);
                     }
-                    GUILayout.Label(mb.GetType().Name, AllGUIStyle.DEFAULT_LABEL);
+                    GUILayout.Label(cp.GetType().Name, AllGUIStyle.DEFAULT_LABEL);
                     GUILayout.EndHorizontal();
                 }
 
                 GUILayout.EndVertical();
                 GUILayout.EndScrollView();
 
-                if (GUILayout.Button("Close", GUILayout.Height(20))) DeActivate();
+                if (GUILayout.Button("Close")) DeActivate();
 
             }, "Components On " + Utils.GetGameObjectPath(TargetTransform.gameObject), AllGUIStyle.DEFAULT_WINDOW);
         }
@@ -176,56 +176,15 @@ namespace Payload.MonoScript
         {
             GUILayout.Window(WindowID.TRANSFORM_MODIFIER_PROPERTIES_LIST, AllRect.PropRect, (id) =>
             {
-                TargetComponent.enabled = (GUILayout.Toggle(TargetComponent.enabled, "Enabled"));
                 ScrollPositionProp = GUILayout.BeginScrollView(ScrollPositionProp);
-                GUILayout.BeginVertical();
-                //
-                IList<PropertyInfo> props = new List<PropertyInfo>(TargetComponent.GetType().GetProperties());
-                foreach (PropertyInfo prop in props)
-                {
-                    GUILayout.BeginHorizontal();
 
-                    try
-                    {
-                        if (prop.CanRead)
-                        {
-                            object val = prop.GetValue(TargetComponent, null);
-                            GUILayout.Label(prop.Name + "(" + prop.PropertyType.Name + ") : " + val, AllGUIStyle.DEFAULT_LABEL);
-                            if (prop.CanWrite)
-                            {
-                                if (prop.PropertyType == typeof(bool))
-                                    prop.SetValue(TargetComponent, GUILayout.Toggle((bool)val, ""), null);
-                                else if (prop.PropertyType == typeof(int))
-                                    prop.SetValue(TargetComponent, Convert.ToInt32(GUILayout.TextField(((int)val) + "")), null);
-                                else if (prop.PropertyType == typeof(float))
-                                    prop.SetValue(TargetComponent, Convert.ToSingle(GUILayout.TextField(((float)val) + "")), null);
-                                else if (prop.PropertyType == typeof(double))
-                                    prop.SetValue(TargetComponent, Convert.ToDouble(GUILayout.TextField(((double)val) + "")), null);
-                                else if (prop.PropertyType == typeof(string))
-                                    prop.SetValue(TargetComponent, GUILayout.TextField((string)val), null);
-                            }
-                        }
-                        else
-                        {
-                            GUILayout.Label(prop.Name + "(" + prop.PropertyType.Name + ") : __UNREADABLE", AllGUIStyle.DEFAULT_LABEL);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        //TODO:...Damn
-                        this.InjectLogError("Something Went Wrong When Drawing Properties",e);
-                    }
-                    
+                Reflector.DrawVarList(TargetComponent);
 
-                    GUILayout.EndHorizontal();
-                }
-
-                GUILayout.EndVertical();
                 GUILayout.EndScrollView();
 
-                if (GUILayout.Button("Close", GUILayout.Height(20))) TargetComponent = null;
+                if (GUILayout.Button("Close")) TargetComponent = null;
 
-            }, "Properties On " + TargetComponent.GetType().Name, AllGUIStyle.DEFAULT_WINDOW);
+            }, "Var On " + TargetComponent.GetType().Name, AllGUIStyle.DEFAULT_WINDOW);
         }
         private void OnGUITransformPathInput()
         {

@@ -124,8 +124,8 @@ namespace Payload.MonoScript
 
 
                 GUILayout.BeginHorizontal();
-                if (GUILayout.Button("Clr", GUILayout.Height(20))) logBuffer.Clear();
-                if (GUILayout.Button("Close", GUILayout.Height(20))) Active = false;
+                if (GUILayout.Button("Clr")) logBuffer.Clear();
+                if (GUILayout.Button("Close")) Active = false;
                 GUILayout.EndHorizontal();
 
             }, "Unity Console", AllGUIStyle.DEFAULT_WINDOW);

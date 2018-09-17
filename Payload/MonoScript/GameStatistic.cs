@@ -87,7 +87,7 @@ namespace Payload.MonoScript
                 GUILayout.EndVertical();
                 GUILayout.EndScrollView();
 
-                if (GUILayout.Button("Close", GUILayout.Height(20))) Active = false;
+                if (GUILayout.Button("Close")) Active = false;
 
             }, "Game Statistic", AllGUIStyle.DEFAULT_WINDOW);
         }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using UnityEngine;
 
@@ -8,7 +9,7 @@ namespace Payload.MonoScript
 {
     public static class InjectDebug
     {
-        private const string prefix = "__Injector--: ";
+        public const string prefix = "__Injector--: ";
         public static void InjectLog(this MonoBehaviour mono, string msg)
         {
             Debug.Log(prefix + mono.GetType().Name+":\r\n"+msg);
@@ -46,18 +47,18 @@ namespace Payload.MonoScript
 
     public static class AllRect
     {
-        public static readonly Rect HierRect         = new Rect(Screen.width * 0.02f, Screen.height * 0.02f, Screen.width * 0.30f, Screen.height * 0.96f);
-
+        //Ln1
+        public static readonly Rect FreeCamRect      = new Rect(Screen.width * 0.02f, Screen.height * 0.02f, Screen.width * 0.30f, Screen.height * 0.14f);
+        public static readonly Rect HierRect         = new Rect(Screen.width * 0.02f, Screen.height * 0.18f, Screen.width * 0.30f, Screen.height * 0.80f);
+        //Ln2
         public static readonly Rect PathInputerRect  = new Rect(Screen.width * 0.34f, Screen.height * 0.02f, Screen.width * 0.3f, 20);
         public static readonly Rect CompoRect        = new Rect(Screen.width * 0.34f, Screen.height * 0.02f, Screen.width * 0.3f, Screen.height * 0.40f);
-        public static readonly Rect PropRect         = new Rect(Screen.width * 0.34f, Screen.height * 0.42f, Screen.width * 0.3f, Screen.height * 0.56f);
-        
-        public static readonly Rect StatisticRect    = new Rect(Screen.width * 0.66f, Screen.height * 0.02f, Screen.width * 0.32f, Screen.height * 0.44f);
-        public static readonly Rect FreeCamRect      = new Rect(Screen.width * 0.66f, Screen.height * 0.48f, Screen.width * 0.32f, Screen.height * 0.10f);
-        public static readonly Rect ConsoleRect      = new Rect(Screen.width * 0.34f, Screen.height * 0.60f, Screen.width * 0.64f, Screen.height * 0.38f);
+        public static readonly Rect PropRect         = new Rect(Screen.width * 0.34f, Screen.height * 0.44f, Screen.width * 0.3f, Screen.height * 0.54f);
+        //Ln3
+        public static readonly Rect StatisticRect    = new Rect(Screen.width * 0.66f, Screen.height * 0.02f, Screen.width * 0.32f, Screen.height * 0.46f);
+        public static readonly Rect ConsoleRect      = new Rect(Screen.width * 0.66f, Screen.height * 0.50f, Screen.width * 0.32f, Screen.height * 0.48f);
     }
-
-
+    
     public static class Utils
     {
 
@@ -101,4 +102,75 @@ namespace Payload.MonoScript
         }
 
     }
+
+    public static class Reflector
+    {
+        public static void DrawVarList(Component component)
+        {
+
+            List<PropertyInfo> props = new List<PropertyInfo>(component.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic));
+            List<FieldInfo> fields = new List<FieldInfo>(component.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic));
+            //List<MethodInfo> methods = new List<MethodInfo>(mono.GetType().GetMethods());
+
+            GUILayout.BeginVertical();
+            foreach (PropertyInfo prop in props)
+            {
+                try
+                {
+                    GUILayout.Label(prop.PropertyType.Name + " " + prop.Name);
+                    if (prop.CanRead)
+                        GUILayout.Label("get: "+ prop.GetValue(component, null)+"");
+                    //if (prop.CanRead && prop.CanWrite)
+                        //prop.SetValue(component, VarEditBox(prop.PropertyType, prop.GetValue(component, null)), null);
+                }
+                catch (Exception e)
+                {
+                    //TODO:...Damn
+                    Debug.LogError(InjectDebug.prefix + "Something Went Wrong When Drawing Variables!" + "\r\n" + e.Message + "\r\n" + e.StackTrace);
+                }
+            }
+            foreach (FieldInfo field in fields)
+            {
+                try
+                {
+                    GUILayout.Label(FullFieldName(field) +" = " + field.GetValue(component));
+                    //field.SetValue(component, VarEditBox(field.FieldType, field.GetValue(component)));
+                }
+                catch (Exception e)
+                {
+                    //TODO:...Damn
+                    Debug.LogError(InjectDebug.prefix + "Something Went Wrong When Drawing Variables!" + "\r\n" + e.Message + "\r\n" + e.StackTrace);
+                }
+            }
+            GUILayout.EndVertical();
+
+        }
+
+        private static string FullFieldName(FieldInfo field)
+        {
+            string visit = string.Empty;
+            if (field.IsPublic) visit = "Public ";
+            if (field.IsPrivate) visit = "Private ";
+
+            return visit + (field.IsStatic ? "Static " : "") + field.FieldType.Name + " " + field.Name;
+        }
+
+        private static object VarEditBox(Type t,object o)
+        {
+            if (t == typeof(bool))
+                return GUILayout.Toggle((bool)o, "");
+            else if (t == typeof(int))
+                return Convert.ToInt32(GUILayout.TextField(((int)o) + ""));
+            else if (t == typeof(float))
+                return Convert.ToSingle(GUILayout.TextField(((float)o) + ""));
+            else if (t == typeof(double))
+                return Convert.ToDouble(GUILayout.TextField(((double)o) + ""));
+            else if (t == typeof(string))
+                return GUILayout.TextField((string)o);
+
+            return o;
+        }
+
+    }
+
 }

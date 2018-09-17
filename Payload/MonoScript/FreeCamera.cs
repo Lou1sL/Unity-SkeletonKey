@@ -79,7 +79,7 @@ namespace Payload.MonoScript
                 RotationSpeed = GUILayout.HorizontalSlider(RotationSpeed, 0f, 1f);
                 GUILayout.EndHorizontal();
 
-                if (GUILayout.Button("Deactivate", GUILayout.Height(20)))
+                if (GUILayout.Button("Deactivate"))
                 {
                     transform.position = DefaultPosition;
                     transform.rotation = DefaultRotation;

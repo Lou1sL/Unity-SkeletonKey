@@ -74,12 +74,12 @@ namespace Payload.MonoScript
             GUILayout.Window(WindowID.TRANSFORM_WITH_TRIGGER_LIST, AllRect.HierRect, (id) =>
             {
                 cManager.OnGUIDrawScrollView();
-                if (GUILayout.Button("Close", GUILayout.Height(20)))
+                if (GUILayout.Button("Close"))
                 {
                     Active = false;
                 }
 
-            }, "Trigger Hierarchy", AllGUIStyle.DEFAULT_WINDOW);
+            }, "Collider Hierarchy", AllGUIStyle.DEFAULT_WINDOW);
         }
         
         private string AimingObjName = string.Empty;
