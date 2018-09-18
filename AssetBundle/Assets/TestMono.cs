@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class TestMono : MonoBehaviour {
-    
+
+    public Light light;
+
     public int TestField = 1;
-    private int TestFieldPrivate = 2;
+    private Color TestFieldPrivate = new Color(1,1,1,1);
 
     public int TestProp { get; set; }
     public int TestPropGet { get { return -1; } }
@@ -22,7 +24,7 @@ public class TestMono : MonoBehaviour {
 
     private void Update()
     {
-        
+        light.color = TestFieldPrivate;
     }
 
     private void AddOne()

@@ -163,7 +163,7 @@ namespace Payload.MonoScript
         {
             GUILayout.BeginVertical();
 
-
+            GUILayout.Label("---------------------------------------------------------------------------");
             for (int i = 0; i < vm.props.Count; i++)
             {
                 PropertyInfo prop = vm.props[i];
@@ -184,7 +184,7 @@ namespace Payload.MonoScript
                     Debug.LogError(InjectDebug.prefix + "Something Went Wrong When Drawing Variables!" + "\r\n" + e.Message + "\r\n" + e.StackTrace);
                 }
                 
-                GUILayout.Label("");
+                GUILayout.Label("---------------------------------------------------------------------------");
             }
             for (int i = 0; i < vm.fields.Count; i++)
             {
@@ -200,7 +200,7 @@ namespace Payload.MonoScript
                     Debug.LogError(InjectDebug.prefix + "Something Went Wrong When Drawing Variables!" + "\r\n" + e.Message + "\r\n" + e.StackTrace);
                 }
 
-                GUILayout.Label("");
+                GUILayout.Label("---------------------------------------------------------------------------");
             }
             
 
@@ -246,6 +246,36 @@ namespace Payload.MonoScript
                 o = Convert.ToDouble(GUILayout.TextField(((double)o) + ""));
             else if (t == typeof(string))
                 o = GUILayout.TextField((string)o);
+            else if (t == typeof(Vector2))
+            {
+                GUILayout.BeginHorizontal();
+                o = new Vector2(
+                    Convert.ToSingle(GUILayout.TextField(((Vector2)o).x.ToString())),
+                    Convert.ToSingle(GUILayout.TextField(((Vector2)o).y.ToString()))
+                    );
+                GUILayout.EndHorizontal();
+            }
+            else if (t == typeof(Vector3))
+            {
+                GUILayout.BeginHorizontal();
+                o = new Vector3(
+                    Convert.ToSingle(GUILayout.TextField(((Vector3)o).x.ToString())),
+                    Convert.ToSingle(GUILayout.TextField(((Vector3)o).y.ToString())),
+                    Convert.ToSingle(GUILayout.TextField(((Vector3)o).z.ToString()))
+                    );
+                GUILayout.EndHorizontal();
+            }
+            else if (t == typeof(Color))
+            {
+                GUILayout.BeginHorizontal();
+                o = new Color(
+                    Convert.ToSingle(GUILayout.HorizontalSlider(((Color)o).r, 0f, 1f)),
+                    Convert.ToSingle(GUILayout.HorizontalSlider(((Color)o).g, 0f, 1f)),
+                    Convert.ToSingle(GUILayout.HorizontalSlider(((Color)o).b, 0f, 1f)),
+                    Convert.ToSingle(GUILayout.HorizontalSlider(((Color)o).a, 0f, 1f))
+                    );
+                GUILayout.EndHorizontal();
+            }
             else Editable = false;
 
             if (Editable)
@@ -258,11 +288,11 @@ namespace Payload.MonoScript
                 {
                     vm.propsModifyCache[i] = o;
                 }
-                if (GUILayout.Button("Update", GUILayout.Width(70)))
+                if (GUILayout.Button("Update", GUILayout.Width(55)))
                     //TODO:Not working!
                     vm.UpdateCache(cata, i);
 
-                if (GUILayout.Button("Set", GUILayout.Width(40)))
+                if (GUILayout.Button("Set", GUILayout.Width(35)))
                     vm.Set(cata, i);
 
             }
