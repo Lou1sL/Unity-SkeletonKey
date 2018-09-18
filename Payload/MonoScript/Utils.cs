@@ -250,13 +250,6 @@ namespace Payload.MonoScript
 
             if (Editable)
             {
-                if (GUILayout.Button("Update", GUILayout.Width(70)))
-                    //TODO:Not working!
-                    vm.UpdateCache(cata, i);
-
-                if (GUILayout.Button("Set", GUILayout.Width(40)))
-                    vm.Set(cata, i);
-
                 if (cata == VarCata.Field)
                 {
                     vm.fieldsModifyCache[i] = o;
@@ -265,6 +258,13 @@ namespace Payload.MonoScript
                 {
                     vm.propsModifyCache[i] = o;
                 }
+                if (GUILayout.Button("Update", GUILayout.Width(70)))
+                    //TODO:Not working!
+                    vm.UpdateCache(cata, i);
+
+                if (GUILayout.Button("Set", GUILayout.Width(40)))
+                    vm.Set(cata, i);
+
             }
 
             GUILayout.EndHorizontal();

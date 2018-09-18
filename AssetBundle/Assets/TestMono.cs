@@ -15,11 +15,19 @@ public class TestMono : MonoBehaviour {
 
     private void Start()
     {
-        
+        CancelInvoke();
+        InvokeRepeating("AddOne", 1f, 1f);
+        Debug.Log("Wow Start!");
     }
 
     private void Update()
     {
         
+    }
+
+    private void AddOne()
+    {
+        TestField++;
+        TestProp++;
     }
 }
