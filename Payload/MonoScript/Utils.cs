@@ -115,12 +115,12 @@ namespace Payload.MonoScript
         public class VariableModifier
         {
             public Component component { get; private set; }
-            public List<PropertyInfo> props { get; private set; }
-            public List<FieldInfo> fields { get; private set; }
+            private List<PropertyInfo> props;
+            private List<FieldInfo> fields;
             //List<MethodInfo> methods = new List<MethodInfo>(mono.GetType().GetMethods());
 
-            public List<object> propsModifyCache;
-            public List<object> fieldsModifyCache;
+            private List<object> propsModifyCache;
+            private List<object> fieldsModifyCache;
 
             public VariableModifier(Component component)
             {
@@ -149,14 +149,86 @@ namespace Payload.MonoScript
                 if (cata == VarCata.Field)
                     fieldsModifyCache[Pointer] = fields[Pointer].GetValue(component);
             }
-            public void Set(VarCata cata, int Pointer)
+            public void SetCache(VarCata cata, int Pointer, object o)
             {
                 if (cata == VarCata.Property)
+                    propsModifyCache[Pointer] = o;
+
+                if (cata == VarCata.Field)
+                    fieldsModifyCache[Pointer] = o;
+            }
+            public object GetCache(VarCata cata, int Pointer)
+            {
+                if (cata == VarCata.Property)
+                    return propsModifyCache[Pointer];
+
+                if (cata == VarCata.Field)
+                    return fieldsModifyCache[Pointer];
+
+                return null;
+            }
+
+            public void SetVal(VarCata cata, int Pointer)
+            {
+                if (cata == VarCata.Property)
+                {
+                    if (props[Pointer].CanWrite)
                         props[Pointer].SetValue(component, propsModifyCache[Pointer], null);
+                    else
+                        Debug.LogError(InjectDebug.prefix + "This property is Readonly.");
+                }
 
                 if (cata == VarCata.Field)
                     fields[Pointer].SetValue(component, fieldsModifyCache[Pointer]);
             }
+            public object GetVal(VarCata cata, int Pointer)
+            {
+                if (cata == VarCata.Property)
+                {
+                    if (props[Pointer].CanRead)
+                        return props[Pointer].GetValue(component, null);
+                    else
+                        return "UNREADABLE!";
+                }
+
+                if (cata == VarCata.Field)
+                    return fields[Pointer].GetValue(component);
+
+                return null;
+            }
+            public string GetFullName(VarCata cata, int Pointer)
+            {
+                if (cata == VarCata.Property)
+                    return props[Pointer].PropertyType.Name + " " + props[Pointer].Name;
+
+                if (cata == VarCata.Field)
+                {
+                    string visit = string.Empty;
+                    if (fields[Pointer].IsPublic) visit = "Public ";
+                    if (fields[Pointer].IsPrivate) visit = "Private ";
+                    return visit + (fields[Pointer].IsStatic ? "Static " : "") + fields[Pointer].FieldType.Name + " " + fields[Pointer].Name;
+                }
+
+                return null;
+            }
+            public Type GetType(VarCata cata, int Pointer)
+            {
+                if (cata == VarCata.Property)
+                    return props[Pointer].PropertyType;
+
+                if (cata == VarCata.Field)
+                    return fields[Pointer].FieldType;
+
+                return null;
+            }
+            public bool IsPropertySetable(int Pointer)
+            {
+                return props[Pointer].CanWrite;
+            }
+
+            public int PropertyCount { get { return props.Count; } }
+            public int FieldCount { get { return fields.Count; } }
+
         }
 
         public static void DrawVarList(VariableModifier vm)
@@ -164,20 +236,13 @@ namespace Payload.MonoScript
             GUILayout.BeginVertical();
 
             GUILayout.Label("---------------------------------------------------------------------------");
-            for (int i = 0; i < vm.props.Count; i++)
+            for (int i = 0; i < vm.PropertyCount; i++)
             {
-                PropertyInfo prop = vm.props[i];
-
                 try
                 {
-                    GUILayout.Label(prop.PropertyType.Name + " " + prop.Name);
-                    if (prop.CanRead)
-                        GUILayout.Label("Get: " + prop.GetValue(vm.component, null) + "");
-                    if (prop.CanRead && prop.CanWrite)
-                    {
-                        VarEditBox(vm, i, VarCata.Property);
-                    }
-
+                    GUILayout.Label(vm.GetFullName(VarCata.Property, i));
+                    GUILayout.Label("Get: " + vm.GetVal(VarCata.Property, i));
+                    if(vm.IsPropertySetable(i))VarEditBox(vm, i, VarCata.Property);
                 }
                 catch (Exception e)
                 {
@@ -186,13 +251,11 @@ namespace Payload.MonoScript
                 
                 GUILayout.Label("---------------------------------------------------------------------------");
             }
-            for (int i = 0; i < vm.fields.Count; i++)
+            for (int i = 0; i < vm.FieldCount; i++)
             {
-                FieldInfo field = vm.fields[i];
-
                 try
                 {
-                    GUILayout.Label(FullFieldName(field) + " = " + field.GetValue(vm.component));
+                    GUILayout.Label(vm.GetFullName(VarCata.Field, i) + " = " + vm.GetVal(VarCata.Field, i));
                     VarEditBox(vm, i, VarCata.Field);
                 }
                 catch (Exception e)
@@ -208,15 +271,7 @@ namespace Payload.MonoScript
             GUILayout.EndVertical();
 
         }
-
-        private static string FullFieldName(FieldInfo field)
-        {
-            string visit = string.Empty;
-            if (field.IsPublic) visit = "Public ";
-            if (field.IsPrivate) visit = "Private ";
-
-            return visit + (field.IsStatic ? "Static " : "") + field.FieldType.Name + " " + field.Name;
-        }
+        
 
         private static void VarEditBox(VariableModifier vm,int i, VarCata cata)
         {
@@ -224,18 +279,9 @@ namespace Payload.MonoScript
             
             bool Editable = true;
 
-            Type t = null;
-            object o = null;
-            if (cata == VarCata.Field)
-            {
-                o = vm.fieldsModifyCache[i];
-                t = vm.fields[i].FieldType;
-            }
-            if (cata == VarCata.Property)
-            {
-                o = vm.propsModifyCache[i];
-                t = vm.props[i].PropertyType;
-            }
+            Type t = vm.GetType(cata, i);
+            object o = vm.GetCache(cata, i);
+
             if (t == typeof(bool))
                 o = GUILayout.Toggle((bool)o, "");
             else if (t == typeof(int))
@@ -280,21 +326,14 @@ namespace Payload.MonoScript
 
             if (Editable)
             {
-                if (cata == VarCata.Field)
-                {
-                    vm.fieldsModifyCache[i] = o;
-                }
-                if (cata == VarCata.Property)
-                {
-                    vm.propsModifyCache[i] = o;
-                }
+                vm.SetCache(cata, i, o);
+
                 if (GUILayout.Button("Update", GUILayout.Width(55)))
                     //TODO:Not working!
                     vm.UpdateCache(cata, i);
 
                 if (GUILayout.Button("Set", GUILayout.Width(35)))
-                    vm.Set(cata, i);
-
+                    vm.SetVal(cata, i);
             }
 
             GUILayout.EndHorizontal();

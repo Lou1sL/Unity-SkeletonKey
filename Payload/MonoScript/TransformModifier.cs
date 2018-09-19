@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Payload.MonoScript
 {
@@ -197,7 +192,7 @@ namespace Payload.MonoScript
         {
             if (!Instance)
                 return;
-            Instance.TransformPath = string.Empty;
+            Instance.TransformPath = Utils.GetGameObjectPath(transform.gameObject);
             Instance.Active = true;
             Instance.TargetTransform = transform;
             Instance.TargetComponentModifier = null;
