@@ -19,7 +19,7 @@ namespace Payload
         public static void Eject()
         {
             //Since this function is easily broken...
-            //I'll leave it.
+            //I'll just leave it.:(
             //Object.Destroy(gameObject);
         }
     }
