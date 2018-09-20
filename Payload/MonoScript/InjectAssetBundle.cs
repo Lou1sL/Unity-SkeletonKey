@@ -20,7 +20,7 @@ namespace Payload.MonoScript
         }
 
         private void OnDestroy()
-        {
+        {  
             InjectedScene.Unload(true);
         }
 
@@ -30,7 +30,7 @@ namespace Payload.MonoScript
             //InjectedAssetBundle = AssetBundle.LoadFromFile(@".\InjectAssetBundle\InjectAssetBundle");
             InjectedAsset = AssetBundle.LoadFromFile(@".\InjectAssetBundle\inject_asset");
             InjectedScene = AssetBundle.LoadFromFile(@".\InjectAssetBundle\inject_scene");
-
+            
             string[] scenePaths = InjectedScene.GetAllScenePaths();
 
             string sceneName = Path.GetFileNameWithoutExtension(scenePaths[0]);

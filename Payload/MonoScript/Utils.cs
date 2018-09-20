@@ -10,22 +10,22 @@ namespace Payload.MonoScript
     public static class InjectDebug
     {
         public const string prefix = "__Injector--: ";
-        public static void InjectLog(this MonoBehaviour mono, string msg)
+        public static void InjectLog(this MonoBehaviour mono, object msg)
         {
-            Debug.Log(prefix + mono.GetType().Name+":\r\n"+msg);
+            Debug.Log(prefix + mono.GetType().Name + ":\r\n" + msg.ToString());
         }
-        public static void InjectLogWarning(this MonoBehaviour mono, string msg)
+        public static void InjectLogWarning(this MonoBehaviour mono, object msg)
         {
-            Debug.LogWarning(prefix + mono.GetType().Name + ":\r\n" + msg);
+            Debug.LogWarning(prefix + mono.GetType().Name + ":\r\n" + msg.ToString());
         }
-        public static void InjectLogError(this MonoBehaviour mono, string msg, Exception e = null)
+        public static void InjectLogError(this MonoBehaviour mono, object msg, Exception e = null)
         {
             string trace = string.Empty;
             if (e != null)
             {
                 trace = "\r\n" + e.Message + "\r\n" + e.StackTrace;
             }
-            Debug.LogError(prefix + mono.GetType().Name + ":\r\n" + msg + trace);
+            Debug.LogError(prefix + mono.GetType().Name + ":\r\n" + msg.ToString() + trace);
         }
     }
 
@@ -329,7 +329,6 @@ namespace Payload.MonoScript
                 vm.SetCache(cata, i, o);
 
                 if (GUILayout.Button("Update", GUILayout.Width(55)))
-                    //TODO:Not working!
                     vm.UpdateCache(cata, i);
 
                 if (GUILayout.Button("Set", GUILayout.Width(35)))
