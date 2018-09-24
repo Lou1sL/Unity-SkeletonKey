@@ -60,16 +60,16 @@ namespace Payload.MonoScript
                             cam.gameObject.AddComponent<FreeCamera>();
                         }
                     }
-                    if (!cam.GetComponent<ColliderDrawer>())
+                    if (!cam.GetComponent<SceneHierarchy>())
                     {
                         if (GUILayout.Button("DrawCollider", GUILayout.Width(120)))
                         {
                             foreach (Camera cams in Camera.allCameras)
                             {
-                                ColliderDrawer cd = cams.GetComponent<ColliderDrawer>();
+                                SceneHierarchy cd = cams.GetComponent<SceneHierarchy>();
                                 if (cd) DestroyImmediate(cd);
                             }
-                            cam.gameObject.AddComponent<ColliderDrawer>();
+                            cam.gameObject.AddComponent<SceneHierarchy>();
                         }
                     }
                     GUILayout.EndHorizontal();

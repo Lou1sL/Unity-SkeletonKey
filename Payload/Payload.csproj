@@ -67,7 +67,7 @@
     <Compile Include="MonoScript\FreeCamera.cs" />
     <Compile Include="MonoScript\GameStatistic.cs" />
     <Compile Include="MonoScript\TransformModifier.cs" />
-    <Compile Include="MonoScript\ColliderDrawer.cs" />
+    <Compile Include="MonoScript\SceneHierarchy.cs" />
     <Compile Include="MonoScript\Console.cs" />
     <Compile Include="MonoScript\InjectAssetBundle.cs" />
     <Compile Include="MonoScript\InjectMonoManager.cs" />

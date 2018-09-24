@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Payload.MonoScript
 {
-    public class ColliderDrawer : MonoBehaviour
+    public class SceneHierarchy : MonoBehaviour
     {
         private bool Active = true;
         
@@ -14,7 +14,7 @@ namespace Payload.MonoScript
         private KeyCode DrawDistInc = KeyCode.End;
         private KeyCode DrawDistDec = KeyCode.Delete;
 
-        private ColliderManager cManager = new ColliderManager();
+        private SceneGameObjectManager goManager = new SceneGameObjectManager();
 
         
 
@@ -26,18 +26,18 @@ namespace Payload.MonoScript
             camera = GetComponent<Camera>();
 
             //TODO:May not included in build
-            cManager.lineMat = new Material(Shader.Find("Hidden/Internal-Colored"));
-            cManager.lineMat.SetInt("_ZTest", (int)UnityEngine.Rendering.CompareFunction.Disabled);
+            goManager.lineMat = new Material(Shader.Find("Hidden/Internal-Colored"));
+            goManager.lineMat.SetInt("_ZTest", (int)UnityEngine.Rendering.CompareFunction.Disabled);
 
 
-            InvokeRepeating("RefreshColliderHashSet",0.01f,1f);
+            InvokeRepeating("RefreshHashSet",0.01f,1f);
             
         }
 
         void OnPostRender()
         {
             if (!Active) return;
-            cManager.PostRenderProcess();
+            goManager.PostRenderProcess();
         }
 
         private void Update()
@@ -47,20 +47,20 @@ namespace Payload.MonoScript
 
             if (!Active) return;
             if (Input.GetKeyDown(DrawDistInc))
-                cManager.DrawDistance += 10f;
+                goManager.DrawDistance += 10f;
             if (Input.GetKeyDown(DrawDistDec))
-                cManager.DrawDistance -= 10f;
+                goManager.DrawDistance -= 10f;
             
         }
 
 
-        private void RefreshColliderHashSet()
+        private void RefreshHashSet()
         {
             if (Active)
             {
                 foreach (var go in FindObjectsOfType<GameObject>())
                 {
-                    cManager.UpdateCollider(go,transform.position);
+                    goManager.UpdateGameObject(go,transform.position);
                 }
             }
             
@@ -73,7 +73,7 @@ namespace Payload.MonoScript
             
             GUILayout.Window(WindowID.TRANSFORM_WITH_TRIGGER_LIST, AllRect.HierRect, (id) =>
             {
-                cManager.OnGUIDrawScrollView();
+                goManager.OnGUIDrawScrollView();
                 if (GUILayout.Button("Close"))
                 {
                     Active = false;
@@ -87,18 +87,20 @@ namespace Payload.MonoScript
         {
             AimingObjName = string.Empty;
             if (!Active) return;
-            AimingObjName = cManager.MouseRayCastCollider(camera);
+            AimingObjName = goManager.MouseRayCastCollider(camera);
         }
 
         
-        private class ColliderManager
+        private class SceneGameObjectManager
         {
+            private HashSet<GameObject> NonColliderHashSet = new HashSet<GameObject>();
             private HashSet<Collider> ColliderHashSet = new HashSet<Collider>();
             private HashSet<Collider2D> Collider2DHashSet = new HashSet<Collider2D>();
 
             private Vector2 GUIScrollPosition = new Vector2();
 
             public bool IsTriggerOnly = true;
+            public bool ShowNonCollider = false;
             public float DrawDistance = 100f;
 
             public Material lineMat;
@@ -106,7 +108,7 @@ namespace Payload.MonoScript
             public string filter = string.Empty;
             public bool filterCaseIgnore = true;
 
-            public void UpdateCollider(GameObject gameObject,Vector3 centerPosi)
+            public void UpdateGameObject(GameObject gameObject,Vector3 centerPosi)
             {
                 if (DrawDistance < 0f) DrawDistance = 0f;
 
@@ -126,6 +128,13 @@ namespace Payload.MonoScript
                         Collider2DHashSet.Add(collider2D);
                     else
                         Collider2DHashSet.Remove(collider2D);
+                }
+                if(!collider && !collider2D && ShowNonCollider)
+                {
+                    if (Vector3.Distance(gameObject.transform.position, centerPosi) <= DrawDistance)
+                        NonColliderHashSet.Add(gameObject);
+                    else
+                        NonColliderHashSet.Remove(gameObject);
                 }
             }
        
@@ -253,7 +262,8 @@ namespace Payload.MonoScript
             public void OnGUIDrawScrollView()
             {
                 GUILayout.BeginHorizontal();
-                IsTriggerOnly = GUILayout.Toggle(IsTriggerOnly, "IsTriggerOnly");
+                ShowNonCollider = GUILayout.Toggle(ShowNonCollider, "Non collider");
+                IsTriggerOnly = GUILayout.Toggle(IsTriggerOnly, "Trigger only");
                 GUILayout.Label("DetectDist(0-500)");
                 DrawDistance = GUILayout.HorizontalSlider(DrawDistance, 0f, 500f);
                 GUILayout.EndHorizontal();
@@ -265,6 +275,23 @@ namespace Payload.MonoScript
 
                 GUIScrollPosition = GUILayout.BeginScrollView(GUIScrollPosition);
                 GUILayout.BeginVertical();
+                if (ShowNonCollider)
+                {
+                    GUILayout.Label("NON-COLLIDER:");
+                    foreach (GameObject t in NonColliderHashSet)
+                    {
+                        if (filter != string.Empty && (filterCaseIgnore ? (!t.name.ToUpper().Contains(filter.ToUpper())) : (!t.name.Contains(filter)))) continue;
+                        GUILayout.BeginHorizontal();
+                        if (GUILayout.Button("□", GUILayout.Width(20)))
+                        {
+                            TransformModifier.Activate(t.transform);
+                        }
+                        GUILayout.Label(Utils.GetGameObjectPath(t), AllGUIStyle.DEFAULT_LABEL);
+                        GUILayout.EndHorizontal();
+                    }
+                }
+
+                GUILayout.Label("3D-COLLIDER:");
                 foreach (Collider t in ColliderHashSet)
                 {
                     if (filter != string.Empty && (filterCaseIgnore ? (!t.gameObject.name.ToUpper().Contains(filter.ToUpper())) : (!t.gameObject.name.Contains(filter)))) continue;
@@ -276,6 +303,8 @@ namespace Payload.MonoScript
                     GUILayout.Label(Utils.GetGameObjectPath(t.gameObject), AllGUIStyle.DEFAULT_LABEL);
                     GUILayout.EndHorizontal();
                 }
+
+                GUILayout.Label("2D-COLLIDER:");
                 foreach (Collider2D t2d in Collider2DHashSet)
                 {
                     if (filter != string.Empty && (filterCaseIgnore ? (!t2d.gameObject.name.ToUpper().Contains(filter.ToUpper())) : (!t2d.gameObject.name.Contains(filter)))) continue;
