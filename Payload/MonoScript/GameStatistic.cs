@@ -33,7 +33,7 @@ namespace Payload.MonoScript
                 str += "Cameras (Total:" + Camera.allCamerasCount + "):\n";
                 GUILayout.Label(str, AllGUIStyle.DEFAULT_LABEL);
 
-
+                
                 foreach (Camera cam in Camera.allCameras)
                 {
 

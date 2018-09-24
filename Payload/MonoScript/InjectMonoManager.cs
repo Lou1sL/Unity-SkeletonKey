@@ -13,7 +13,6 @@ namespace Payload.MonoScript
             gameObject.AddComponent<Console>();
             gameObject.AddComponent<GameStatistic>();
             gameObject.AddComponent<TransformModifier>();
-            Camera.main.gameObject.AddComponent<FreeCamera>();
             gameObject.AddComponent<InjectAssetBundle>();
         }
         

@@ -340,4 +340,234 @@ namespace Payload.MonoScript
 
     }
 
+    public class GameObjectTree
+    {
+        public class GameObjectNode
+        {
+            public int Level { get; private set; }
+            public string Path { get; private set; }
+            public GameObject Me { get; private set; }
+            public Collider collider { get; private set; }
+            public Collider2D collider2D { get; private set; }
+            public bool Expanded = false;
+            public List<GameObjectNode> Children { get; private set; }
+
+            public GameObjectNode(GameObject go, int level)
+            {
+                Level = level;
+                Me = go;
+                Path = Utils.GetGameObjectPath(Me);
+                collider = Me.GetComponent<Collider>();
+                collider2D = Me.GetComponent<Collider2D>();
+                Children = new List<GameObjectNode>();
+                int childCount = Me.transform.childCount;
+                if (childCount > 0)
+                {
+                    for (int i = 0; i < childCount; i++)
+                    {
+                        Children.Add(new GameObjectNode(Me.transform.GetChild(i).gameObject, level + 1));
+                    }
+                }
+            }
+
+            public void OnGUIHierarchy()
+            {
+                GUILayout.BeginHorizontal();
+
+                GUILayout.Label("", GUILayout.Width(20 * Level));
+                if (Children.Count > 0)
+                    if (GUILayout.Button(Expanded ? "↑" : "↓", GUILayout.Width(20)))
+                    {
+                        Expanded = !Expanded;
+                    }
+                if (GUILayout.Button("□", GUILayout.Width(20)))
+                {
+                    TransformModifier.Activate(Me.transform);
+                }
+                GUILayout.Label(Me.name, AllGUIStyle.DEFAULT_LABEL);
+
+                GUILayout.EndHorizontal();
+
+                if (Expanded)
+                    foreach (GameObjectNode node in Children)
+                    {
+                        node.OnGUIHierarchy();
+                    }
+            }
+            public void OnGUISearch(string str)
+            {
+                if (Me.name.ToUpper().Contains(str.ToUpper()))
+                {
+                    GUILayout.BeginHorizontal();
+
+                    if (GUILayout.Button("□", GUILayout.Width(20)))
+                    {
+                        TransformModifier.Activate(Me.transform);
+                    }
+                    GUILayout.Label(Path, AllGUIStyle.DEFAULT_LABEL);
+
+                    GUILayout.EndHorizontal();
+                }
+                foreach (GameObjectNode node in Children)
+                {
+                    node.OnGUISearch(str);
+                }
+            }
+
+            public void OnPostRenderer(Vector3 center, float distence, string str = "")
+            {
+                if ((str == "" || Me.name.ToUpper().Contains(str.ToUpper())) && Vector3.Distance(center, Me.transform.position) <= distence)
+                {
+                    if (collider) PostRenderDrawCollider(collider);
+                    if (collider2D) PostRenderDrawCollider2D(collider2D);
+                }
+
+                foreach (GameObjectNode node in Children)
+                {
+                    node.OnPostRenderer(center,distence,str);
+                }
+            }
+
+            private static void PostRenderDrawCollider2D(Collider2D c2d)
+            {
+                var vertices = new Vector3[4];
+                var thisMatrix = c2d.transform.localToWorldMatrix;
+                var storedRotation = c2d.transform.rotation;
+                c2d.transform.rotation = Quaternion.identity;
+
+                var extents = c2d.bounds.extents;
+                vertices[0] = thisMatrix.MultiplyPoint3x4(extents);
+                vertices[1] = thisMatrix.MultiplyPoint3x4(new Vector3(-extents.x, extents.y, 0));
+                vertices[2] = thisMatrix.MultiplyPoint3x4(new Vector3(extents.x, -extents.y, 0));
+                vertices[3] = thisMatrix.MultiplyPoint3x4(new Vector3(-extents.x, -extents.y, 0));
+
+                c2d.transform.rotation = storedRotation;
+
+                //UP
+                GL.Vertex3(vertices[0].x, vertices[0].y, 0);
+                GL.Vertex3(vertices[1].x, vertices[1].y, 0);
+
+                //SIDE
+                GL.Vertex3(vertices[0].x, vertices[0].y, 0);
+                GL.Vertex3(vertices[2].x, vertices[2].y, 0);
+
+                GL.Vertex3(vertices[1].x, vertices[1].y, 0);
+                GL.Vertex3(vertices[3].x, vertices[3].y, 0);
+
+                //BOTTOM
+                GL.Vertex3(vertices[2].x, vertices[2].y, 0);
+                GL.Vertex3(vertices[3].x, vertices[3].y, 0);
+            }
+            private static void PostRenderDrawCollider(Collider c)
+            {
+                //Get all verticles
+                var vertices = new Vector3[8];
+                var thisMatrix = c.transform.localToWorldMatrix;
+                var storedRotation = c.transform.rotation;
+                c.transform.rotation = Quaternion.identity;
+
+                var extents = c.bounds.extents;
+                vertices[0] = thisMatrix.MultiplyPoint3x4(extents);
+                vertices[1] = thisMatrix.MultiplyPoint3x4(new Vector3(-extents.x, extents.y, extents.z));
+                vertices[2] = thisMatrix.MultiplyPoint3x4(new Vector3(extents.x, extents.y, -extents.z));
+                vertices[3] = thisMatrix.MultiplyPoint3x4(new Vector3(-extents.x, extents.y, -extents.z));
+                vertices[4] = thisMatrix.MultiplyPoint3x4(new Vector3(extents.x, -extents.y, extents.z));
+                vertices[5] = thisMatrix.MultiplyPoint3x4(new Vector3(-extents.x, -extents.y, extents.z));
+                vertices[6] = thisMatrix.MultiplyPoint3x4(new Vector3(extents.x, -extents.y, -extents.z));
+                vertices[7] = thisMatrix.MultiplyPoint3x4(-extents);
+
+                c.transform.rotation = storedRotation;
+
+                //GL process
+                //UP
+                GL.Vertex3(vertices[0].x, vertices[0].y, vertices[0].z);
+                GL.Vertex3(vertices[1].x, vertices[1].y, vertices[1].z);
+
+                GL.Vertex3(vertices[1].x, vertices[1].y, vertices[1].z);
+                GL.Vertex3(vertices[3].x, vertices[3].y, vertices[3].z);
+
+                GL.Vertex3(vertices[3].x, vertices[3].y, vertices[3].z);
+                GL.Vertex3(vertices[2].x, vertices[2].y, vertices[2].z);
+
+                GL.Vertex3(vertices[2].x, vertices[2].y, vertices[2].z);
+                GL.Vertex3(vertices[0].x, vertices[0].y, vertices[0].z);
+
+                //SIDE
+                GL.Vertex3(vertices[0].x, vertices[0].y, vertices[0].z);
+                GL.Vertex3(vertices[4].x, vertices[4].y, vertices[4].z);
+
+                GL.Vertex3(vertices[1].x, vertices[1].y, vertices[1].z);
+                GL.Vertex3(vertices[5].x, vertices[5].y, vertices[5].z);
+
+                GL.Vertex3(vertices[3].x, vertices[3].y, vertices[3].z);
+                GL.Vertex3(vertices[7].x, vertices[7].y, vertices[7].z);
+
+                GL.Vertex3(vertices[2].x, vertices[2].y, vertices[2].z);
+                GL.Vertex3(vertices[6].x, vertices[6].y, vertices[6].z);
+
+                //BOTTOM
+                GL.Vertex3(vertices[4].x, vertices[4].y, vertices[4].z);
+                GL.Vertex3(vertices[5].x, vertices[5].y, vertices[5].z);
+
+                GL.Vertex3(vertices[5].x, vertices[5].y, vertices[5].z);
+                GL.Vertex3(vertices[7].x, vertices[7].y, vertices[7].z);
+
+                GL.Vertex3(vertices[7].x, vertices[7].y, vertices[7].z);
+                GL.Vertex3(vertices[6].x, vertices[6].y, vertices[6].z);
+
+                GL.Vertex3(vertices[6].x, vertices[6].y, vertices[6].z);
+                GL.Vertex3(vertices[4].x, vertices[4].y, vertices[4].z);
+            }
+
+        }
+        public List<GameObjectNode> RootNodes { get; private set; }
+
+        public GameObjectTree()
+        {
+            RootNodes = new List<GameObjectNode>();
+            //UpdateTree();
+        }
+        public void UpdateTree()
+        {
+            RootNodes.Clear();
+            //TODO:This only works on Unity v5.3 and after!
+            GameObject [] RootGO = UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects();
+            foreach (GameObject go in RootGO) RootNodes.Add(new GameObjectNode(go,0));
+        }
+
+
+        private Vector2 GUIScrollPosition = new Vector2();
+        public void OnGUIHierarchy(string filter = "")
+        {
+
+            GUIScrollPosition = GUILayout.BeginScrollView(GUIScrollPosition);
+            GUILayout.BeginVertical();
+            foreach (GameObjectNode node in RootNodes)
+            {
+                if (filter == "")
+                    node.OnGUIHierarchy();
+                else
+                    node.OnGUISearch(filter);
+            }
+            GUILayout.EndVertical();
+            GUILayout.EndScrollView();
+
+
+        }
+        public void OnPostRenderer(Material lineMat,Vector3 center, float distence, string str = "")
+        {
+            GL.Begin(GL.LINES);
+            lineMat.SetPass(0);
+            GL.Color(new Color(0f, 1f, 0f, 1f));
+
+            foreach (GameObjectNode node in RootNodes)
+            {
+                node.OnPostRenderer(center, distence, str);
+            }
+
+            GL.End();
+        }
+
+    }
+
 }
