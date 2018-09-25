@@ -4,13 +4,7 @@ namespace Payload.MonoScript
 {
     public class TransformModifier:MonoBehaviour
     {
-        
-
         private bool Active = false;
-
-        private KeyCode Switch = KeyCode.Home;
-        private KeyCode MvSpdInc = KeyCode.End;
-        private KeyCode MvSpdDec = KeyCode.Delete;
 
         private float MvSpd = 100f;
 
@@ -29,17 +23,9 @@ namespace Payload.MonoScript
 
         private void Update()
         {
-            if (Input.GetKeyDown(Switch))
-            {
-                if (Active)
-                    DeActivate();
-                else
-                    Activate();
-            }
-
             if (Active)
             {
-                MvSpdModify();
+                if (MvSpd < 0f) MvSpd = 0f;
 
                 if (TargetTransform)
                     MovingInput();
@@ -75,12 +61,6 @@ namespace Payload.MonoScript
                 TargetTransform = null;
                 TargetComponentModifier = null;
             }
-        }
-        private void MvSpdModify()
-        {
-            if (Input.GetKeyDown(MvSpdInc)) MvSpd += 10f;
-            if (Input.GetKeyDown(MvSpdDec)) MvSpd -= 10f;
-            if (MvSpd < 0f) MvSpd = 0f;
         }
         private void MovingInput()
         {
@@ -122,9 +102,6 @@ namespace Payload.MonoScript
                         OnGUIPropertyWindow();
                 }
             }
-            else
-                OnGUITransformPathInput();
-
         }
 
         private void OnGUIComponentWindow()
@@ -182,10 +159,6 @@ namespace Payload.MonoScript
                     TargetComponentModifier = null;
                 }
             }, "Var On " + TargetComponentModifier.component.GetType().Name, AllGUIStyle.DEFAULT_WINDOW);
-        }
-        private void OnGUITransformPathInput()
-        {
-            TransformPath = GUI.TextField(AllRect.PathInputerRect, TransformPath);
         }
         
         public static void Activate(Transform transform)

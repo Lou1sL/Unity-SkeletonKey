@@ -13,17 +13,22 @@ namespace Payload.MonoScript
         private KeyCode Switch = KeyCode.Insert;
 
         private GameObjectTree GOTree;
+        private DrawCollider drawCollider;
+        private GameObjectSearch search;
+
         private new Camera camera;
 
         private Material LineMat;
         private float DrawDistance = 100f;
         private string filter = string.Empty;
-
-
+        private bool SearchMode = false;
+        
         private void Start()
         {
             GOTree = new GameObjectTree();
             GOTree.UpdateTree();
+            drawCollider = new DrawCollider();
+            search = new GameObjectSearch();
             camera = GetComponent<Camera>();
 
             //TODO:May not included in build
@@ -33,7 +38,7 @@ namespace Payload.MonoScript
         private void OnPostRender()
         {
             if (!Active) return;
-            GOTree.OnPostRenderer(LineMat, transform.position, DrawDistance, filter);
+            drawCollider.OnPostRenderer(LineMat);
         }
         private void Update()
         {
@@ -48,20 +53,35 @@ namespace Payload.MonoScript
             
             GUILayout.Window(WindowID.TRANSFORM_WITH_TRIGGER_LIST, AllRect.HierRect, (id) =>
             {
-                if (GUILayout.Button("Update Hierarchy")) GOTree.UpdateTree();
+                if (GUILayout.Button("Update Hierarchy && Collider Cache"))
+                {
+                    GOTree.UpdateTree();
+                    drawCollider.UpdateCache(FindObjectsOfType<GameObject>(),camera.transform.position,DrawDistance,filter);
+                }
+
                 GUILayout.BeginHorizontal();
-                GUILayout.Label("ColliderDist(0-500)", GUILayout.Width(300));
+                GUILayout.Label("GizmosDist(0-500)", GUILayout.Width(110));
                 DrawDistance = GUILayout.HorizontalSlider(DrawDistance, 0f, 500f);
                 GUILayout.EndHorizontal();
 
-                filter = GUILayout.TextField(filter, GUILayout.Width(Screen.width * .2f));
+                GUILayout.BeginHorizontal();
+                filter = GUILayout.TextField(filter);
 
-                GOTree.OnGUIHierarchy(filter);
-                if (GUILayout.Button("Close"))
+                if (GUILayout.Button("?", GUILayout.Width(20)) && filter != string.Empty)
                 {
-                    Active = false;
+                    search.Search(FindObjectsOfType<GameObject>(), filter);
+                    SearchMode = true;
                 }
 
+                if (SearchMode && GUILayout.Button("X", GUILayout.Width(20))) SearchMode = false;
+
+                GUILayout.EndHorizontal();
+
+                if (SearchMode) search.OnGUISearch();
+                else GOTree.OnGUIHierarchy();
+
+
+                if (GUILayout.Button("Close")) Active = false;
             }, "Collider Hierarchy", AllGUIStyle.DEFAULT_WINDOW);
         }
         
@@ -70,14 +90,13 @@ namespace Payload.MonoScript
         {
             AimingObjName = string.Empty;
             if (!Active) return;
-            AimingObjName = MouseRayCastCollider(camera);
+            AimingObjName = MouseRayCastCollider();
         }
 
-        private string MouseRayCastCollider(Camera camera)
+        private string MouseRayCastCollider()
         {
             string str = String.Empty;
-            //TODO:Dist!
-            RaycastHit[] hits = Physics.RaycastAll(camera.ScreenPointToRay(Input.mousePosition), 1000f);
+            RaycastHit[] hits = Physics.RaycastAll(camera.ScreenPointToRay(Input.mousePosition), DrawDistance);
             foreach (RaycastHit hit in hits)
             {
                     str += Utils.GetGameObjectPath(hit.transform.gameObject) + "\n";

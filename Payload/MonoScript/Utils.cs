@@ -344,21 +344,17 @@ namespace Payload.MonoScript
     {
         public class GameObjectNode
         {
+            public GameObject Me { get; private set; }
             public int Level { get; private set; }
             public string Path { get; private set; }
-            public GameObject Me { get; private set; }
-            public Collider collider { get; private set; }
-            public Collider2D collider2D { get; private set; }
             public bool Expanded = false;
             public List<GameObjectNode> Children { get; private set; }
 
             public GameObjectNode(GameObject go, int level)
             {
-                Level = level;
                 Me = go;
+                Level = level;
                 Path = Utils.GetGameObjectPath(Me);
-                collider = Me.GetComponent<Collider>();
-                collider2D = Me.GetComponent<Collider2D>();
                 Children = new List<GameObjectNode>();
                 int childCount = Me.transform.childCount;
                 if (childCount > 0)
@@ -370,7 +366,7 @@ namespace Payload.MonoScript
                 }
             }
 
-            public void OnGUIHierarchy()
+            public void OnGUIHierarchyNode()
             {
                 GUILayout.BeginHorizontal();
 
@@ -391,43 +387,57 @@ namespace Payload.MonoScript
                 if (Expanded)
                     foreach (GameObjectNode node in Children)
                     {
-                        node.OnGUIHierarchy();
+                        node.OnGUIHierarchyNode();
                     }
             }
-            public void OnGUISearch(string str)
+        }
+        public List<GameObjectNode> RootNodes { get; private set; }
+
+        public GameObjectTree()
+        {
+            RootNodes = new List<GameObjectNode>();
+            //UpdateTree();
+        }
+        public void UpdateTree()
+        {
+            RootNodes.Clear();
+            //TODO:It only works on Unity v5.3 and after!
+            GameObject [] RootGO = UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects();
+            foreach (GameObject go in RootGO) RootNodes.Add(new GameObjectNode(go,0));
+        }
+        
+        private Vector2 GUIScrollPosition = new Vector2();
+        public void OnGUIHierarchy()
+        {
+
+            GUIScrollPosition = GUILayout.BeginScrollView(GUIScrollPosition);
+            GUILayout.BeginVertical();
+            foreach (GameObjectNode node in RootNodes)
             {
-                if (Me.name.ToUpper().Contains(str.ToUpper()))
-                {
-                    GUILayout.BeginHorizontal();
-
-                    if (GUILayout.Button("□", GUILayout.Width(20)))
-                    {
-                        TransformModifier.Activate(Me.transform);
-                    }
-                    GUILayout.Label(Path, AllGUIStyle.DEFAULT_LABEL);
-
-                    GUILayout.EndHorizontal();
-                }
-                foreach (GameObjectNode node in Children)
-                {
-                    node.OnGUISearch(str);
-                }
+                node.OnGUIHierarchyNode();
             }
+            GUILayout.EndVertical();
+            GUILayout.EndScrollView();
+        }
+    }
 
-            public void OnPostRenderer(Vector3 center, float distence, string str = "")
+    public class DrawCollider
+    {
+        private class ColliderPostRenderer
+        {
+            public Collider collider { get; private set; }
+            public Collider2D collider2D { get; private set; }
+
+            public ColliderPostRenderer(GameObject go)
             {
-                if ((str == "" || Me.name.ToUpper().Contains(str.ToUpper())) && Vector3.Distance(center, Me.transform.position) <= distence)
-                {
-                    if (collider) PostRenderDrawCollider(collider);
-                    if (collider2D) PostRenderDrawCollider2D(collider2D);
-                }
-
-                foreach (GameObjectNode node in Children)
-                {
-                    node.OnPostRenderer(center,distence,str);
-                }
+                collider = go.GetComponent<Collider>();
+                collider2D = go.GetComponent<Collider2D>();
             }
-
+            public void OnPostRenderer()
+            {
+                if (collider) PostRenderDrawCollider(collider);
+                if (collider2D) PostRenderDrawCollider2D(collider2D);
+            }
             private static void PostRenderDrawCollider2D(Collider2D c2d)
             {
                 var vertices = new Vector3[4];
@@ -518,56 +528,86 @@ namespace Payload.MonoScript
                 GL.Vertex3(vertices[6].x, vertices[6].y, vertices[6].z);
                 GL.Vertex3(vertices[4].x, vertices[4].y, vertices[4].z);
             }
-
-        }
-        public List<GameObjectNode> RootNodes { get; private set; }
-
-        public GameObjectTree()
-        {
-            RootNodes = new List<GameObjectNode>();
-            //UpdateTree();
-        }
-        public void UpdateTree()
-        {
-            RootNodes.Clear();
-            //TODO:This only works on Unity v5.3 and after!
-            GameObject [] RootGO = UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects();
-            foreach (GameObject go in RootGO) RootNodes.Add(new GameObjectNode(go,0));
         }
 
-
-        private Vector2 GUIScrollPosition = new Vector2();
-        public void OnGUIHierarchy(string filter = "")
+        private List<ColliderPostRenderer> ColliderCache;
+        public DrawCollider()
         {
+            ColliderCache = new List<ColliderPostRenderer>();
+        }
 
-            GUIScrollPosition = GUILayout.BeginScrollView(GUIScrollPosition);
-            GUILayout.BeginVertical();
-            foreach (GameObjectNode node in RootNodes)
+        public void UpdateCache(GameObject[] AllObjectsInScene,Vector3 center,float dist,string filter)
+        {
+            ColliderCache.Clear();
+            foreach (GameObject go in AllObjectsInScene)
             {
-                if (filter == "")
-                    node.OnGUIHierarchy();
-                else
-                    node.OnGUISearch(filter);
+                if ((filter == "" || go.name.ToUpper().Contains(filter.ToUpper())) && Vector3.Distance(center, go.transform.position) <= dist)
+                {
+                    ColliderPostRenderer pr = new ColliderPostRenderer(go);
+                    if (pr.collider || pr.collider2D)
+                        ColliderCache.Add(new ColliderPostRenderer(go));
+                }
             }
-            GUILayout.EndVertical();
-            GUILayout.EndScrollView();
-
-
         }
-        public void OnPostRenderer(Material lineMat,Vector3 center, float distence, string str = "")
+        public void OnPostRenderer(Material lineMat)
         {
             GL.Begin(GL.LINES);
             lineMat.SetPass(0);
             GL.Color(new Color(0f, 1f, 0f, 1f));
 
-            foreach (GameObjectNode node in RootNodes)
+            foreach (ColliderPostRenderer pr in ColliderCache)
             {
-                node.OnPostRenderer(center, distence, str);
+                pr.OnPostRenderer();
             }
 
             GL.End();
         }
 
+
     }
 
+    public class GameObjectSearch
+    {
+        private class GameObjectWithPath
+        {
+            public GameObject gameObject { get; private set; }
+            public string path { get; private set; }
+            public GameObjectWithPath(GameObject go)
+            {
+                gameObject = go;
+                path = Utils.GetGameObjectPath(go);
+            }
+        }
+        private List<GameObjectWithPath> Result = new List<GameObjectWithPath>();
+
+        public void Search(GameObject[] AllObjectsInScene,string str)
+        {
+            Result.Clear();
+            foreach(GameObject go in AllObjectsInScene)
+            {
+                if (go.name.ToUpper().Contains(str.ToUpper())) Result.Add(new GameObjectWithPath(go));
+            }
+        }
+
+        private Vector2 GUIScrollPosition = new Vector2();
+        public void OnGUISearch()
+        {
+            GUIScrollPosition = GUILayout.BeginScrollView(GUIScrollPosition);
+            GUILayout.BeginVertical();
+            foreach (GameObjectWithPath gowp in Result)
+            {
+                GUILayout.BeginHorizontal();
+
+                if (GUILayout.Button("□", GUILayout.Width(20)))
+                {
+                    TransformModifier.Activate(gowp.gameObject.transform);
+                }
+                GUILayout.Label(gowp.path, AllGUIStyle.DEFAULT_LABEL);
+
+                GUILayout.EndHorizontal();
+            }
+            GUILayout.EndVertical();
+            GUILayout.EndScrollView();
+        }
+    }
 }
