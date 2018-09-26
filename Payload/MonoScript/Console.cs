@@ -109,7 +109,7 @@ namespace Payload.MonoScript
         private void OnGUI()
         {
             if (!Active) return;
-            GUILayout.Window(WindowID.CONSOLE, AllRect.ConsoleRect, (id) =>
+            AllRect.ConsoleRect = GUILayout.Window(WindowID.CONSOLE, AllRect.ConsoleRect, (id) =>
             {
                 GUILayout.BeginHorizontal();
                 logBuffer.ShowLog = GUILayout.Toggle(logBuffer.ShowLog, "Log");
@@ -128,7 +128,9 @@ namespace Payload.MonoScript
                 if (GUILayout.Button("Close")) Active = false;
                 GUILayout.EndHorizontal();
 
-            }, "Unity Console", AllGUIStyle.DEFAULT_WINDOW);
+
+                GUI.DragWindow(new Rect(0, 0, AllRect.ConsoleRect.width, 20));
+            }, "Console", AllGUIStyle.DEFAULT_WINDOW);
         }
         private void Update()
         {

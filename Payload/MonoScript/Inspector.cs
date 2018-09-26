@@ -2,7 +2,7 @@
 
 namespace Payload.MonoScript
 {
-    public class TransformModifier:MonoBehaviour
+    public class Inspector:MonoBehaviour
     {
         private bool Active = false;
 
@@ -15,7 +15,7 @@ namespace Payload.MonoScript
         private Vector2 ScrollPosition = new Vector2();
         private Vector2 ScrollPositionProp = new Vector2();
 
-        private static TransformModifier Instance = null;
+        private static Inspector Instance = null;
         private void Awake()
         {
             Instance = this;
@@ -106,7 +106,7 @@ namespace Payload.MonoScript
 
         private void OnGUIComponentWindow()
         {
-            GUILayout.Window(WindowID.TRANSFORM_MODIFIER_COMPONENT_LIST, AllRect.CompoRect, (id) =>
+            AllRect.CompoRect = GUILayout.Window(WindowID.TRANSFORM_MODIFIER_COMPONENT_LIST, AllRect.CompoRect, (id) =>
             {
                 GUILayout.BeginHorizontal();
                 GUILayout.Label("MoveSpd(0-500)");
@@ -142,11 +142,12 @@ namespace Payload.MonoScript
 
                 if (GUILayout.Button("Close")) DeActivate();
 
-            }, "Components On " + Utils.GetGameObjectPath(TargetTransform.gameObject), AllGUIStyle.DEFAULT_WINDOW);
+                GUI.DragWindow(new Rect(0, 0, AllRect.CompoRect.width, 20));
+            }, "Inspector (" + TargetTransform.gameObject.name + ")", AllGUIStyle.DEFAULT_WINDOW);
         }
         private void OnGUIPropertyWindow()
         {
-            GUILayout.Window(WindowID.TRANSFORM_MODIFIER_PROPERTIES_LIST, AllRect.PropRect, (id) =>
+            AllRect.PropRect = GUILayout.Window(WindowID.TRANSFORM_MODIFIER_PROPERTIES_LIST, AllRect.PropRect, (id) =>
             {
                 ScrollPositionProp = GUILayout.BeginScrollView(ScrollPositionProp);
 
@@ -158,9 +159,11 @@ namespace Payload.MonoScript
                 {
                     TargetComponentModifier = null;
                 }
-            }, "Var On " + TargetComponentModifier.component.GetType().Name, AllGUIStyle.DEFAULT_WINDOW);
+
+                GUI.DragWindow(new Rect(0, 0, AllRect.PropRect.width, 20));
+            }, TargetComponentModifier.component.GetType().Name, AllGUIStyle.DEFAULT_WINDOW);
         }
-        
+
         public static void Activate(Transform transform)
         {
             if (!Instance)

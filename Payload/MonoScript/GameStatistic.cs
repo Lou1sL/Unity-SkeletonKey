@@ -18,8 +18,8 @@ namespace Payload.MonoScript
         private void OnGUI()
         {
             if (!Active) return;
-            
-            GUILayout.Window(WindowID.GAME_STATISTIC, AllRect.StatisticRect, (id) =>
+
+            AllRect.StatisticRect = GUILayout.Window(WindowID.GAME_STATISTIC, AllRect.StatisticRect, (id) =>
             {
                 ScrollPosition = GUILayout.BeginScrollView(ScrollPosition);
                 GUILayout.BeginVertical();
@@ -40,7 +40,7 @@ namespace Payload.MonoScript
                     GUILayout.BeginHorizontal();
                     if (GUILayout.Button("□", GUILayout.Width(20)))
                     {
-                        TransformModifier.Activate(cam.transform);
+                        Inspector.Activate(cam.transform);
                     }
                     GUILayout.Label((cam == Camera.main ? "(Main)" : "") + Utils.GetGameObjectPath(cam.gameObject), AllGUIStyle.DEFAULT_LABEL);
                     GUILayout.EndHorizontal();
@@ -62,7 +62,7 @@ namespace Payload.MonoScript
                     }
                     if (!cam.GetComponent<SceneHierarchy>())
                     {
-                        if (GUILayout.Button("DrawCollider", GUILayout.Width(120)))
+                        if (GUILayout.Button("DrawInspector", GUILayout.Width(120)))
                         {
                             foreach (Camera cams in Camera.allCameras)
                             {
@@ -89,6 +89,8 @@ namespace Payload.MonoScript
 
                 if (GUILayout.Button("Close")) Active = false;
 
+
+                GUI.DragWindow(new Rect(0, 0, AllRect.StatisticRect.width, 20));
             }, "Game Statistic", AllGUIStyle.DEFAULT_WINDOW);
         }
 

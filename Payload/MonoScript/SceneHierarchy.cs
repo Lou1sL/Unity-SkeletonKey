@@ -50,8 +50,8 @@ namespace Payload.MonoScript
         {
             if (!Active) return;
             GUI.Label(new Rect(Input.mousePosition.x, Screen.height - Input.mousePosition.y, Screen.width, Screen.height),"<color=#00FF00>"+AimingObjName+"</color>");
-            
-            GUILayout.Window(WindowID.TRANSFORM_WITH_TRIGGER_LIST, AllRect.HierRect, (id) =>
+
+            AllRect.HierRect = GUILayout.Window(WindowID.TRANSFORM_WITH_TRIGGER_LIST, AllRect.HierRect, (id) =>
             {
                 if (GUILayout.Button("Update Hierarchy && Collider Cache"))
                 {
@@ -82,7 +82,9 @@ namespace Payload.MonoScript
 
 
                 if (GUILayout.Button("Close")) Active = false;
-            }, "Collider Hierarchy", AllGUIStyle.DEFAULT_WINDOW);
+
+                GUI.DragWindow(new Rect(0, 0, AllRect.HierRect.width, 20));
+            }, "Scene Hierarchy", AllGUIStyle.DEFAULT_WINDOW);
         }
         
         private string AimingObjName = string.Empty;

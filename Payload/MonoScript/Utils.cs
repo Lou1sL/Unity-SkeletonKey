@@ -48,15 +48,14 @@ namespace Payload.MonoScript
     public static class AllRect
     {
         //Ln1
-        public static readonly Rect FreeCamRect      = new Rect(Screen.width * 0.02f, Screen.height * 0.02f, Screen.width * 0.30f, Screen.height * 0.14f);
-        public static readonly Rect HierRect         = new Rect(Screen.width * 0.02f, Screen.height * 0.18f, Screen.width * 0.30f, Screen.height * 0.80f);
+        public static Rect FreeCamRect      = new Rect(Screen.width * 0.02f, Screen.height * 0.02f, Screen.width * 0.30f, Screen.height * 0.14f);
+        public static Rect HierRect         = new Rect(Screen.width * 0.02f, Screen.height * 0.18f, Screen.width * 0.30f, Screen.height * 0.80f);
         //Ln2
-        public static readonly Rect PathInputerRect  = new Rect(Screen.width * 0.34f, Screen.height * 0.02f, Screen.width * 0.3f, 20);
-        public static readonly Rect CompoRect        = new Rect(Screen.width * 0.34f, Screen.height * 0.02f, Screen.width * 0.3f, Screen.height * 0.40f);
-        public static readonly Rect PropRect         = new Rect(Screen.width * 0.34f, Screen.height * 0.44f, Screen.width * 0.3f, Screen.height * 0.54f);
+        public static Rect CompoRect        = new Rect(Screen.width * 0.34f, Screen.height * 0.02f, Screen.width * 0.3f, Screen.height * 0.40f);
+        public static Rect PropRect         = new Rect(Screen.width * 0.34f, Screen.height * 0.44f, Screen.width * 0.3f, Screen.height * 0.54f);
         //Ln3
-        public static readonly Rect StatisticRect    = new Rect(Screen.width * 0.66f, Screen.height * 0.02f, Screen.width * 0.32f, Screen.height * 0.46f);
-        public static readonly Rect ConsoleRect      = new Rect(Screen.width * 0.66f, Screen.height * 0.50f, Screen.width * 0.32f, Screen.height * 0.48f);
+        public static Rect StatisticRect    = new Rect(Screen.width * 0.66f, Screen.height * 0.02f, Screen.width * 0.32f, Screen.height * 0.46f);
+        public static Rect ConsoleRect      = new Rect(Screen.width * 0.66f, Screen.height * 0.50f, Screen.width * 0.32f, Screen.height * 0.48f);
     }
     
     public static class Utils
@@ -315,10 +314,10 @@ namespace Payload.MonoScript
             {
                 GUILayout.BeginHorizontal();
                 o = new Color(
-                    Convert.ToSingle(GUILayout.HorizontalSlider(((Color)o).r, 0f, 1f)),
-                    Convert.ToSingle(GUILayout.HorizontalSlider(((Color)o).g, 0f, 1f)),
-                    Convert.ToSingle(GUILayout.HorizontalSlider(((Color)o).b, 0f, 1f)),
-                    Convert.ToSingle(GUILayout.HorizontalSlider(((Color)o).a, 0f, 1f))
+                    GUILayout.HorizontalSlider(((Color)o).r, 0f, 1f),
+                    GUILayout.HorizontalSlider(((Color)o).g, 0f, 1f),
+                    GUILayout.HorizontalSlider(((Color)o).b, 0f, 1f),
+                    GUILayout.HorizontalSlider(((Color)o).a, 0f, 1f)
                     );
                 GUILayout.EndHorizontal();
             }
@@ -370,7 +369,13 @@ namespace Payload.MonoScript
             {
                 GUILayout.BeginHorizontal();
 
-                GUILayout.Label("", GUILayout.Width(20 * Level));
+                if (Level > 0)
+                    GUILayout.Label(" ┣", GUILayout.Width(20));
+                if (Level > 1)
+                    for (int i = 0; i < Level - 1; i++)
+                        GUILayout.Label(" ━", GUILayout.Width(20));
+
+
                 if (Children.Count > 0)
                     if (GUILayout.Button(Expanded ? "↑" : "↓", GUILayout.Width(20)))
                     {
@@ -378,7 +383,7 @@ namespace Payload.MonoScript
                     }
                 if (GUILayout.Button("□", GUILayout.Width(20)))
                 {
-                    TransformModifier.Activate(Me.transform);
+                    Inspector.Activate(Me.transform);
                 }
                 GUILayout.Label(Me.name, AllGUIStyle.DEFAULT_LABEL);
 
@@ -600,7 +605,7 @@ namespace Payload.MonoScript
 
                 if (GUILayout.Button("□", GUILayout.Width(20)))
                 {
-                    TransformModifier.Activate(gowp.gameObject.transform);
+                    Inspector.Activate(gowp.gameObject.transform);
                 }
                 GUILayout.Label(gowp.path, AllGUIStyle.DEFAULT_LABEL);
 

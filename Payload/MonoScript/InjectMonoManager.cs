@@ -12,7 +12,7 @@ namespace Payload.MonoScript
 
             gameObject.AddComponent<Console>();
             gameObject.AddComponent<GameStatistic>();
-            gameObject.AddComponent<TransformModifier>();
+            gameObject.AddComponent<Inspector>();
             gameObject.AddComponent<InjectAssetBundle>();
         }
         

@@ -67,7 +67,7 @@ namespace Payload.MonoScript
         {
             if (!Active) return;
 
-            GUILayout.Window(WindowID.FREE_CAM_VALUES, AllRect.FreeCamRect, (id) =>
+            AllRect.FreeCamRect = GUILayout.Window(WindowID.FREE_CAM_VALUES, AllRect.FreeCamRect, (id) =>
             {
                 GUILayout.BeginHorizontal();
                 GUILayout.Label("Mov Speed:");
@@ -85,8 +85,8 @@ namespace Payload.MonoScript
                     transform.rotation = DefaultRotation;
                     Active = false;
                 }
-                    
 
+                GUI.DragWindow(new Rect(0, 0, AllRect.FreeCamRect.width, 20));
             }, "Free Camera", AllGUIStyle.DEFAULT_WINDOW);
         }
 
