@@ -34,7 +34,7 @@ namespace Payload.MonoScript
             string[] scenePaths = InjectedScene.GetAllScenePaths();
 
             string sceneName = Path.GetFileNameWithoutExtension(scenePaths[0]);
-            this.InjectLog("Load scene:" + sceneName);
+            //this.InjectLog("Load scene:" + sceneName);
             //SceneManager.LoadScene(sceneName);
         }
     }

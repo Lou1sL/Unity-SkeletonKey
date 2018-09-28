@@ -64,6 +64,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Main.cs" />
+    <Compile Include="MonoScript\CheatTool.cs" />
     <Compile Include="MonoScript\FreeCamera.cs" />
     <Compile Include="MonoScript\GameStatistic.cs" />
     <Compile Include="MonoScript\Inspector.cs" />
