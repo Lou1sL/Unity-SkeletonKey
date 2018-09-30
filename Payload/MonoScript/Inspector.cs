@@ -9,7 +9,7 @@ namespace Payload.MonoScript
         private float MvSpd = 100f;
 
         private Transform TargetTransform;
-        private Reflector.VariableModifier TargetComponentModifier;
+        private Reflector TargetComponentModifier;
         
         
         private Vector2 ScrollPosition = new Vector2();
@@ -23,6 +23,8 @@ namespace Payload.MonoScript
 
         private void Update()
         {
+            if (TargetComponentModifier != null)
+                TargetComponentModifier.LockedVarUpdate();
             if (Active)
             {
                 if (MvSpd < 0f) MvSpd = 0f;
@@ -126,7 +128,7 @@ namespace Payload.MonoScript
                     GUILayout.BeginHorizontal();
                     if (GUILayout.Button("□", GUILayout.Width(20)))
                     {
-                        TargetComponentModifier = new Reflector.VariableModifier(cp);
+                        TargetComponentModifier = new Reflector(cp);
                     }
                     if (GUILayout.Button("RM", GUILayout.Width(40)))
                     {
@@ -151,7 +153,7 @@ namespace Payload.MonoScript
             {
                 ScrollPositionProp = GUILayout.BeginScrollView(ScrollPositionProp);
 
-                Reflector.DrawVarList(TargetComponentModifier);
+                TargetComponentModifier.DrawVarList();
 
                 GUILayout.EndScrollView();
 

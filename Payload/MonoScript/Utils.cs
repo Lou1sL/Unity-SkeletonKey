@@ -102,160 +102,170 @@ namespace Payload.MonoScript
 
     }
 
-    public static class Reflector
+    public class Reflector
     {
-
         public enum VarCata
         {
             Field,
             Property
         }
+        
+        
 
-        public class VariableModifier
+        public Component component { get; private set; }
+        private List<PropertyInfo> props;
+        private List<FieldInfo> fields;
+        //List<MethodInfo> methods = new List<MethodInfo>(mono.GetType().GetMethods());
+
+        private List<object> propsModifyCache;
+        private List<bool> autoSetProps;
+        private List<object> fieldsModifyCache;
+        private List<bool> autoSetFields;
+
+
+        public Reflector(Component component)
         {
-            public Component component { get; private set; }
-            private List<PropertyInfo> props;
-            private List<FieldInfo> fields;
-            //List<MethodInfo> methods = new List<MethodInfo>(mono.GetType().GetMethods());
+            this.component = component;
+            props = new List<PropertyInfo>(component.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic));
+            fields = new List<FieldInfo>(component.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic));
 
-            private List<object> propsModifyCache;
-            private List<object> fieldsModifyCache;
-
-            public VariableModifier(Component component)
+            propsModifyCache = new List<object>();
+            for (int i = 0; i < props.Count; i++)
             {
-                this.component = component;
-                props = new List<PropertyInfo>(component.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic));
-                fields = new List<FieldInfo>(component.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic));
-
-                propsModifyCache = new List<object>();
-                for (int i = 0; i < props.Count; i++)
-                {
-                    propsModifyCache.Add(props[i].CanRead?props[i].GetValue(component, null):"UNREADABLE");
-                }
-
-                fieldsModifyCache = new List<object>();
-                for (int i = 0; i < fields.Count; i++)
-                {
-                    fieldsModifyCache.Add(fields[i].GetValue(component));
-                }
+                propsModifyCache.Add(props[i].CanRead ? props[i].GetValue(component, null) : "UNREADABLE");
             }
 
-            public void UpdateCache(VarCata cata, int Pointer)
+            fieldsModifyCache = new List<object>();
+            for (int i = 0; i < fields.Count; i++)
             {
-                if (cata == VarCata.Property)
-                        propsModifyCache[Pointer] = props[Pointer].GetValue(component, null);
-
-                if (cata == VarCata.Field)
-                    fieldsModifyCache[Pointer] = fields[Pointer].GetValue(component);
-            }
-            public void SetCache(VarCata cata, int Pointer, object o)
-            {
-                if (cata == VarCata.Property)
-                    propsModifyCache[Pointer] = o;
-
-                if (cata == VarCata.Field)
-                    fieldsModifyCache[Pointer] = o;
-            }
-            public object GetCache(VarCata cata, int Pointer)
-            {
-                if (cata == VarCata.Property)
-                    return propsModifyCache[Pointer];
-
-                if (cata == VarCata.Field)
-                    return fieldsModifyCache[Pointer];
-
-                return null;
+                fieldsModifyCache.Add(fields[i].GetValue(component));
             }
 
-            public void SetVal(VarCata cata, int Pointer)
-            {
-                if (cata == VarCata.Property)
-                {
-                    if (props[Pointer].CanWrite)
-                        props[Pointer].SetValue(component, propsModifyCache[Pointer], null);
-                    else
-                        Debug.LogError(InjectDebug.prefix + "This property is Readonly.");
-                }
-
-                if (cata == VarCata.Field)
-                    fields[Pointer].SetValue(component, fieldsModifyCache[Pointer]);
-            }
-            public object GetVal(VarCata cata, int Pointer)
-            {
-                if (cata == VarCata.Property)
-                {
-                    if (props[Pointer].CanRead)
-                        return props[Pointer].GetValue(component, null);
-                    else
-                        return "UNREADABLE!";
-                }
-
-                if (cata == VarCata.Field)
-                    return fields[Pointer].GetValue(component);
-
-                return null;
-            }
-            public string GetFullName(VarCata cata, int Pointer)
-            {
-                if (cata == VarCata.Property)
-                    return props[Pointer].PropertyType.Name + " " + props[Pointer].Name;
-
-                if (cata == VarCata.Field)
-                {
-                    string visit = string.Empty;
-                    if (fields[Pointer].IsPublic) visit = "Public ";
-                    if (fields[Pointer].IsPrivate) visit = "Private ";
-                    return visit + (fields[Pointer].IsStatic ? "Static " : "") + fields[Pointer].FieldType.Name + " " + fields[Pointer].Name;
-                }
-
-                return null;
-            }
-            public Type GetType(VarCata cata, int Pointer)
-            {
-                if (cata == VarCata.Property)
-                    return props[Pointer].PropertyType;
-
-                if (cata == VarCata.Field)
-                    return fields[Pointer].FieldType;
-
-                return null;
-            }
-            public bool IsPropertySetable(int Pointer)
-            {
-                return props[Pointer].CanWrite;
-            }
-
-            public int PropertyCount { get { return props.Count; } }
-            public int FieldCount { get { return fields.Count; } }
+            autoSetProps = Enumerable.Repeat(false, props.Count).ToList();
+            autoSetFields = Enumerable.Repeat(false, fields.Count).ToList();
 
         }
 
-        public static void DrawVarList(VariableModifier vm)
+        private void UpdateCache(VarCata cata, int Pointer)
+        {
+            if (cata == VarCata.Property)
+                propsModifyCache[Pointer] = props[Pointer].GetValue(component, null);
+
+            if (cata == VarCata.Field)
+                fieldsModifyCache[Pointer] = fields[Pointer].GetValue(component);
+        }
+        private void SetCache(VarCata cata, int Pointer, object o)
+        {
+            if (cata == VarCata.Property)
+                propsModifyCache[Pointer] = o;
+
+            if (cata == VarCata.Field)
+                fieldsModifyCache[Pointer] = o;
+        }
+        private object GetCache(VarCata cata, int Pointer)
+        {
+            if (cata == VarCata.Property)
+                return propsModifyCache[Pointer];
+
+            if (cata == VarCata.Field)
+                return fieldsModifyCache[Pointer];
+
+            return null;
+        }
+
+        private void SetVal(VarCata cata, int Pointer)
+        {
+            if (cata == VarCata.Property)
+            {
+                if (props[Pointer].CanWrite)
+                {
+                    props[Pointer].SetValue(component, propsModifyCache[Pointer], null);
+                }
+                else
+                    Debug.LogError(InjectDebug.prefix + "This property is Readonly.");
+            }
+
+            if (cata == VarCata.Field)
+            {
+                fields[Pointer].SetValue(component, fieldsModifyCache[Pointer]);
+            }
+        }
+        private object GetVal(VarCata cata, int Pointer)
+        {
+            if (cata == VarCata.Property)
+            {
+                if (props[Pointer].CanRead)
+                    return props[Pointer].GetValue(component, null);
+                else
+                    return "UNREADABLE!";
+            }
+
+            if (cata == VarCata.Field)
+                return fields[Pointer].GetValue(component);
+
+            return null;
+        }
+        private string GetFullName(VarCata cata, int Pointer)
+        {
+            if (cata == VarCata.Property)
+                return props[Pointer].PropertyType.Name + " " + props[Pointer].Name;
+
+            if (cata == VarCata.Field)
+            {
+                string visit = string.Empty;
+                if (fields[Pointer].IsPublic) visit = "Public ";
+                if (fields[Pointer].IsPrivate) visit = "Private ";
+                return visit + (fields[Pointer].IsStatic ? "Static " : "") + fields[Pointer].FieldType.Name + " " + fields[Pointer].Name;
+            }
+
+            return null;
+        }
+        private Type GetType(VarCata cata, int Pointer)
+        {
+            if (cata == VarCata.Property)
+                return props[Pointer].PropertyType;
+
+            if (cata == VarCata.Field)
+                return fields[Pointer].FieldType;
+
+            return null;
+        }
+        private bool IsPropertySetable(int Pointer)
+        {
+            return props[Pointer].CanWrite;
+        }
+
+        private void AutoSetVal(VarCata cata, int Pointer,bool autoSet)
+        {
+            if (cata == VarCata.Property)
+                autoSetProps[Pointer] = autoSet;
+            if (cata == VarCata.Field)
+                autoSetFields[Pointer] = autoSet;
+        }
+        private bool IsAutoSetVal(VarCata cata,int Pointer)
+        {
+            if(cata== VarCata.Property)
+                return autoSetProps[Pointer];
+            if (cata == VarCata.Field)
+                return autoSetFields[Pointer];
+            return false;
+        }
+
+        private int PropertyCount { get { return props.Count; } }
+        private int FieldCount { get { return fields.Count; } }
+
+        public void DrawVarList()
         {
             GUILayout.BeginVertical();
 
             GUILayout.Label("---------------------------------------------------------------------------");
-            for (int i = 0; i < vm.PropertyCount; i++)
+            for (int i = 0; i < PropertyCount; i++)
             {
                 try
                 {
-                    GUILayout.Label(vm.GetFullName(VarCata.Property, i));
-                    GUILayout.Label("Get: " + vm.GetVal(VarCata.Property, i));
-                    if(vm.IsPropertySetable(i))VarEditBox(vm, i, VarCata.Property);
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError(InjectDebug.prefix + "Something Went Wrong When Drawing Variables!" + "\r\n" + e.Message + "\r\n" + e.StackTrace);
-                }
-                
-                GUILayout.Label("---------------------------------------------------------------------------");
-            }
-            for (int i = 0; i < vm.FieldCount; i++)
-            {
-                try
-                {
-                    GUILayout.Label(vm.GetFullName(VarCata.Field, i) + " = " + vm.GetVal(VarCata.Field, i));
-                    VarEditBox(vm, i, VarCata.Field);
+                    GUILayout.Label(GetFullName(VarCata.Property, i));
+                    GUILayout.Label("Get: " + GetVal(VarCata.Property, i));
+                    if (IsPropertySetable(i)) VarEditBox(i, VarCata.Property);
                 }
                 catch (Exception e)
                 {
@@ -264,22 +274,35 @@ namespace Payload.MonoScript
 
                 GUILayout.Label("---------------------------------------------------------------------------");
             }
-            
+            for (int i = 0; i < FieldCount; i++)
+            {
+                try
+                {
+                    GUILayout.Label(GetFullName(VarCata.Field, i) + " = " + GetVal(VarCata.Field, i));
+                    VarEditBox(i, VarCata.Field);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError(InjectDebug.prefix + "Something Went Wrong When Drawing Variables!" + "\r\n" + e.Message + "\r\n" + e.StackTrace);
+                }
+
+                GUILayout.Label("---------------------------------------------------------------------------");
+            }
+
 
 
             GUILayout.EndVertical();
 
         }
-        
-
-        private static void VarEditBox(VariableModifier vm,int i, VarCata cata)
+        private void VarEditBox(int i, VarCata cata)
         {
+            GUILayout.BeginVertical();
             GUILayout.BeginHorizontal();
-            
+
             bool Editable = true;
 
-            Type t = vm.GetType(cata, i);
-            object o = vm.GetCache(cata, i);
+            Type t = GetType(cata, i);
+            object o = GetCache(cata, i);
 
             if (t == typeof(bool))
                 o = GUILayout.Toggle((bool)o, "");
@@ -323,20 +346,50 @@ namespace Payload.MonoScript
             }
             else Editable = false;
 
+            GUILayout.EndHorizontal();
+
+
+            GUILayout.BeginHorizontal();
+
             if (Editable)
             {
-                vm.SetCache(cata, i, o);
+                SetCache(cata, i, o);
+
+                AutoSetVal(cata, i, GUILayout.Toggle(IsAutoSetVal(cata, i), "Auto Set"));
 
                 if (GUILayout.Button("Update", GUILayout.Width(55)))
-                    vm.UpdateCache(cata, i);
+                    UpdateCache(cata, i);
 
                 if (GUILayout.Button("Set", GUILayout.Width(35)))
-                    vm.SetVal(cata, i);
+                    SetVal(cata, i);
             }
 
             GUILayout.EndHorizontal();
+            GUILayout.EndVertical();
         }
 
+        public void LockedVarUpdate()
+        {
+            if (autoSetProps == null || autoSetFields == null) return;
+
+            if (autoSetProps.Count > 0)
+                for (int p = 0; p < autoSetProps.Count; p++)
+                {
+                    if (autoSetProps[p])
+                    {
+                        SetVal(VarCata.Property, p);
+                    }
+                }
+
+            if (autoSetFields.Count > 0)
+                for (int p = 0; p < autoSetFields.Count; p++)
+                {
+                    if (autoSetFields[p])
+                    {
+                        SetVal(VarCata.Field, p);
+                    }
+                }
+        }
     }
 
     public class GameObjectTree
@@ -615,4 +668,7 @@ namespace Payload.MonoScript
             GUILayout.EndScrollView();
         }
     }
+
+
+
 }
