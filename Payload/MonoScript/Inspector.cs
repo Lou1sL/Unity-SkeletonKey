@@ -10,7 +10,7 @@ namespace Payload.MonoScript
 
         private Transform TargetTransform;
         private Reflector TargetComponentModifier;
-        
+        private Reflector.VarLocker varLocker = new Reflector.VarLocker();
         
         private Vector2 ScrollPosition = new Vector2();
         private Vector2 ScrollPositionProp = new Vector2();
@@ -23,8 +23,6 @@ namespace Payload.MonoScript
 
         private void Update()
         {
-            if (TargetComponentModifier != null)
-                TargetComponentModifier.LockedVarUpdate();
             if (Active)
             {
                 if (MvSpd < 0f) MvSpd = 0f;
@@ -37,6 +35,10 @@ namespace Payload.MonoScript
                     DeActivate();
                 }
             }
+        }
+        private void LateUpdate()
+        {
+            varLocker.LockUpdate();
         }
 
         private void DeActivate()
@@ -153,7 +155,7 @@ namespace Payload.MonoScript
             {
                 ScrollPositionProp = GUILayout.BeginScrollView(ScrollPositionProp);
 
-                TargetComponentModifier.DrawVarList();
+                TargetComponentModifier.DrawVarList(varLocker);
 
                 GUILayout.EndScrollView();
 

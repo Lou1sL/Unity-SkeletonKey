@@ -102,6 +102,8 @@ namespace Payload.MonoScript
 
     }
 
+    
+
     public class Reflector
     {
         public enum VarCata
@@ -118,11 +120,8 @@ namespace Payload.MonoScript
         //List<MethodInfo> methods = new List<MethodInfo>(mono.GetType().GetMethods());
 
         private List<object> propsModifyCache;
-        private List<bool> autoSetProps;
         private List<object> fieldsModifyCache;
-        private List<bool> autoSetFields;
-
-
+        
         public Reflector(Component component)
         {
             this.component = component;
@@ -140,10 +139,6 @@ namespace Payload.MonoScript
             {
                 fieldsModifyCache.Add(fields[i].GetValue(component));
             }
-
-            autoSetProps = Enumerable.Repeat(false, props.Count).ToList();
-            autoSetFields = Enumerable.Repeat(false, fields.Count).ToList();
-
         }
 
         private void UpdateCache(VarCata cata, int Pointer)
@@ -234,27 +229,11 @@ namespace Payload.MonoScript
         {
             return props[Pointer].CanWrite;
         }
-
-        private void AutoSetVal(VarCata cata, int Pointer,bool autoSet)
-        {
-            if (cata == VarCata.Property)
-                autoSetProps[Pointer] = autoSet;
-            if (cata == VarCata.Field)
-                autoSetFields[Pointer] = autoSet;
-        }
-        private bool IsAutoSetVal(VarCata cata,int Pointer)
-        {
-            if(cata== VarCata.Property)
-                return autoSetProps[Pointer];
-            if (cata == VarCata.Field)
-                return autoSetFields[Pointer];
-            return false;
-        }
-
+        
         private int PropertyCount { get { return props.Count; } }
         private int FieldCount { get { return fields.Count; } }
 
-        public void DrawVarList()
+        public void DrawVarList(VarLocker vl)
         {
             GUILayout.BeginVertical();
 
@@ -265,7 +244,7 @@ namespace Payload.MonoScript
                 {
                     GUILayout.Label(GetFullName(VarCata.Property, i));
                     GUILayout.Label("Get: " + GetVal(VarCata.Property, i));
-                    if (IsPropertySetable(i)) VarEditBox(i, VarCata.Property);
+                    if (IsPropertySetable(i)) VarEditBox(vl,i, VarCata.Property);
                 }
                 catch (Exception e)
                 {
@@ -279,7 +258,7 @@ namespace Payload.MonoScript
                 try
                 {
                     GUILayout.Label(GetFullName(VarCata.Field, i) + " = " + GetVal(VarCata.Field, i));
-                    VarEditBox(i, VarCata.Field);
+                    VarEditBox(vl,i, VarCata.Field);
                 }
                 catch (Exception e)
                 {
@@ -294,7 +273,7 @@ namespace Payload.MonoScript
             GUILayout.EndVertical();
 
         }
-        private void VarEditBox(int i, VarCata cata)
+        private void VarEditBox(VarLocker vl,int i, VarCata cata)
         {
             GUILayout.BeginVertical();
             GUILayout.BeginHorizontal();
@@ -351,12 +330,28 @@ namespace Payload.MonoScript
 
             GUILayout.BeginHorizontal();
 
+            bool Locked = false;
+            if (cata == VarCata.Field) Locked = vl.IsLocked(component, fields[i]);
+            if (cata == VarCata.Property) Locked = vl.IsLocked(component, props[i]);
+
+            if (GUILayout.Button(Locked ? "UNLOCK" : "LOCK", GUILayout.Width(80)))
+            {
+                if (cata == VarCata.Field)
+                {
+                    if (Locked) vl.UnLock(component, fields[i]);
+                    else vl.Lock(component, fields[i], fields[i].GetValue(component));
+                }
+                if (cata == VarCata.Property)
+                {
+                    if (Locked) vl.UnLock(component, props[i]);
+                    else vl.Lock(component, props[i], props[i].GetValue(component, null));
+                }
+            }
+
             if (Editable)
             {
                 SetCache(cata, i, o);
-
-                AutoSetVal(cata, i, GUILayout.Toggle(IsAutoSetVal(cata, i), "Auto Set"));
-
+                
                 if (GUILayout.Button("Update", GUILayout.Width(55)))
                     UpdateCache(cata, i);
 
@@ -368,27 +363,121 @@ namespace Payload.MonoScript
             GUILayout.EndVertical();
         }
 
-        public void LockedVarUpdate()
+        
+
+        public class VarLocker
         {
-            if (autoSetProps == null || autoSetFields == null) return;
+            private class Locker
+            {
+                private Component component;
+                private FieldInfo field = null;
+                private PropertyInfo property = null;
 
-            if (autoSetProps.Count > 0)
-                for (int p = 0; p < autoSetProps.Count; p++)
+                public object LockObj;
+
+                public static bool operator ==(Locker x, Locker y)
                 {
-                    if (autoSetProps[p])
-                    {
-                        SetVal(VarCata.Property, p);
-                    }
+                    return x.component == y.component && x.field == y.field && x.property == y.property && x.LockObj == y.LockObj;
+                }
+                public static bool operator !=(Locker x, Locker y)
+                {
+                    return x.component != y.component || x.field != y.field || x.property != y.property || x.LockObj != y.LockObj;
+                }
+                public override bool Equals(object obj)
+                {
+                    if (obj == null) return false;
+                    if (obj is Locker) return ((Locker)obj).component == component && ((Locker)obj).field == field && ((Locker)obj).property == property && ((Locker)obj).LockObj == LockObj;
+                    return base.Equals(obj);
+                }
+                public override int GetHashCode()
+                {
+                    return component.GetHashCode() + field.GetHashCode() + property.GetHashCode() + LockObj.GetHashCode();
                 }
 
-            if (autoSetFields.Count > 0)
-                for (int p = 0; p < autoSetFields.Count; p++)
+                public Locker(Component component, FieldInfo field, object o)
                 {
-                    if (autoSetFields[p])
+                    this.component = component; this.field = field; LockObj = o;
+                }
+                public Locker(Component component, PropertyInfo property, object o)
+                {
+                    this.component = component; this.property = property; LockObj = o;
+                }
+
+                public bool Is(Locker l)
+                {
+                    return component == l.component && field == l.field && property == l.property;
+                }
+                public void LockUpdate()
+                {
+                    if (field != null)
+                        field.SetValue(component, LockObj);
+                    if (property != null && property.CanWrite)
+                        property.SetValue(component, LockObj, null);
+                }
+            }
+
+            private List<Locker> LockList = new List<Locker>();
+            private bool IsLocked(Locker l)
+            {
+                foreach (Locker lo in LockList)
+                {
+                    if(lo.Is(l))return true;
+                }
+                return false;
+            }
+            private void AddList(Locker l)
+            {
+                foreach(Locker lo in LockList)
+                {
+                    if (lo.Is(l))
                     {
-                        SetVal(VarCata.Field, p);
+                        lo.LockObj = l.LockObj;
+                        return;
                     }
                 }
+                LockList.Add(l);
+            }
+            private void RmList(Locker l)
+            {
+                if (LockList.Count > 0)
+                    for (int i = 0; i < LockList.Count; i++)
+                    {
+                        if (LockList[i].Is(l))
+                        {
+                            LockList.RemoveAt(i);
+                            i--;
+                        }
+                    }
+            }
+
+            public void Lock(Component component,FieldInfo field,object o)
+            {
+                AddList(new Locker(component, field, o));
+            }
+            public void Lock(Component component, PropertyInfo property, object o)
+            {
+                AddList(new Locker(component, property, o));
+            }
+            public void UnLock(Component component, FieldInfo field)
+            {
+                RmList(new Locker(component, field, null));
+            }
+            public void UnLock(Component component, PropertyInfo property)
+            {
+                RmList(new Locker(component, property, null));
+            }
+            public bool IsLocked(Component component, FieldInfo field)
+            {
+                return IsLocked(new Locker(component, field, null));
+            }
+            public bool IsLocked(Component component, PropertyInfo property)
+            {
+                return IsLocked(new Locker(component, property, null));
+            }
+            public void LockUpdate()
+            {
+                foreach (Locker lo in LockList) lo.LockUpdate();
+            }
         }
     }
 
@@ -668,7 +757,4 @@ namespace Payload.MonoScript
             GUILayout.EndScrollView();
         }
     }
-
-
-
 }
