@@ -369,7 +369,7 @@ namespace Payload.MonoScript
         {
             private class Locker
             {
-                private Component component;
+                public Component component { get; private set; }
                 private FieldInfo field = null;
                 private PropertyInfo property = null;
 
@@ -409,6 +409,7 @@ namespace Payload.MonoScript
                 }
                 public void LockUpdate()
                 {
+                    if (!component) return;
                     if (field != null)
                         field.SetValue(component, LockObj);
                     if (property != null && property.CanWrite)
@@ -476,6 +477,16 @@ namespace Payload.MonoScript
             }
             public void LockUpdate()
             {
+                if (LockList.Count > 0)
+                    for (int i = 0; i < LockList.Count; i++)
+                    {
+                        if (LockList[i].component) LockList[i].LockUpdate();
+                        else
+                        {
+                            LockList.RemoveAt(i);
+                            i--;
+                        }
+                    }
                 foreach (Locker lo in LockList) lo.LockUpdate();
             }
         }

@@ -70,11 +70,11 @@ namespace Payload.MonoScript
         {
             if (Input.GetKey(KeyCode.UpArrow))
             {
-                TargetTransform.position += Vector3.forward * MvSpd * Time.deltaTime;
+                TargetTransform.position += Vector3.up * MvSpd * Time.deltaTime;
             }
             if (Input.GetKey(KeyCode.DownArrow))
             {
-                TargetTransform.position += Vector3.back * MvSpd * Time.deltaTime;
+                TargetTransform.position += Vector3.down * MvSpd * Time.deltaTime;
             }
             if (Input.GetKey(KeyCode.LeftArrow))
             {
@@ -86,11 +86,11 @@ namespace Payload.MonoScript
             }
             if (Input.GetKey(KeyCode.RightShift))
             {
-                TargetTransform.position += Vector3.up * MvSpd * Time.deltaTime;
+                TargetTransform.position += Vector3.forward * MvSpd * Time.deltaTime;
             }
             if (Input.GetKey(KeyCode.RightControl))
             {
-                TargetTransform.position += Vector3.down * MvSpd * Time.deltaTime;
+                TargetTransform.position += Vector3.back * MvSpd * Time.deltaTime;
             }
         }
 
