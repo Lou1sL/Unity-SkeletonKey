@@ -60,18 +60,6 @@ namespace Payload.MonoScript
                             cam.gameObject.AddComponent<FreeCamera>();
                         }
                     }
-                    if (!cam.GetComponent<SceneHierarchy>())
-                    {
-                        if (GUILayout.Button("DrawInspector", GUILayout.Width(120)))
-                        {
-                            foreach (Camera cams in Camera.allCameras)
-                            {
-                                SceneHierarchy cd = cams.GetComponent<SceneHierarchy>();
-                                if (cd) DestroyImmediate(cd);
-                            }
-                            cam.gameObject.AddComponent<SceneHierarchy>();
-                        }
-                    }
                     GUILayout.EndHorizontal();
 
                     string camstr = string.Empty;

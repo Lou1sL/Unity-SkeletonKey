@@ -6,7 +6,7 @@ namespace Payload.MonoScript
     {
         private bool Active = false;
 
-        private float MvSpd = 100f;
+        private float MvSpd = 10f;
 
         private Transform TargetTransform;
         private Reflector TargetComponentModifier;
@@ -113,7 +113,7 @@ namespace Payload.MonoScript
             AllRect.CompoRect = GUILayout.Window(WindowID.TRANSFORM_MODIFIER_COMPONENT_LIST, AllRect.CompoRect, (id) =>
             {
                 GUILayout.BeginHorizontal();
-                GUILayout.Label("MoveSpd(0-500)");
+                GUILayout.Label("MoveSpd(0-500)", GUILayout.Width(110));
                 MvSpd = GUILayout.HorizontalSlider(MvSpd, 0f, 200f);
                 GUILayout.EndHorizontal();
 

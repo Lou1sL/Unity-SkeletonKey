@@ -11,7 +11,7 @@ namespace Payload.MonoScript
             gameObject = base.gameObject;
             
             gameObject.AddComponent<Console>();
-            gameObject.AddComponent<FreeCamera>();
+            Camera.main.gameObject.AddComponent<FreeCamera>();
             gameObject.AddComponent<InjectAssetBundle>();
             gameObject.AddComponent<Inspector>();
             gameObject.AddComponent<SceneHierarchy>();

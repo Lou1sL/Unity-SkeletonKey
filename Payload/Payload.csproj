@@ -64,7 +64,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Main.cs" />
-    <Compile Include="MonoScript\CheatString.cs" />
     <Compile Include="MonoScript\FreeCamera.cs" />
     <Compile Include="MonoScript\Statistic.cs" />
     <Compile Include="MonoScript\Inspector.cs" />
@@ -72,6 +71,7 @@
     <Compile Include="MonoScript\Console.cs" />
     <Compile Include="MonoScript\InjectAssetBundle.cs" />
     <Compile Include="MonoScript\InjectMonoManager.cs" />
+    <Compile Include="MonoScript\Tetris.cs" />
     <Compile Include="MonoScript\Utils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

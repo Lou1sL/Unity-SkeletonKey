@@ -48,8 +48,8 @@ namespace Payload.MonoScript
     public static class AllRect
     {
         //Ln1
-        public static Rect FreeCamRect      = new Rect(Screen.width * 0.02f, Screen.height * 0.02f, Screen.width * 0.30f, Screen.height * 0.14f);
-        public static Rect HierRect         = new Rect(Screen.width * 0.02f, Screen.height * 0.18f, Screen.width * 0.30f, Screen.height * 0.80f);
+        public static Rect FreeCamRect      = new Rect(Screen.width * 0.02f, Screen.height * 0.02f, Screen.width * 0.30f, Screen.height * 0.18f);
+        public static Rect HierRect         = new Rect(Screen.width * 0.02f, Screen.height * 0.22f, Screen.width * 0.30f, Screen.height * 0.76f);
         //Ln2
         public static Rect CompoRect        = new Rect(Screen.width * 0.34f, Screen.height * 0.02f, Screen.width * 0.3f, Screen.height * 0.40f);
         public static Rect PropRect         = new Rect(Screen.width * 0.34f, Screen.height * 0.44f, Screen.width * 0.3f, Screen.height * 0.54f);
