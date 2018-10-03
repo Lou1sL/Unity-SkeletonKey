@@ -16,10 +16,10 @@ namespace Payload.MonoScript
         }
         private void OnGUI()
         {
-            game();
+            if (PlayingTetris) Game();
         }
 
-        private void game()
+        private void Game()
         {
 
         }

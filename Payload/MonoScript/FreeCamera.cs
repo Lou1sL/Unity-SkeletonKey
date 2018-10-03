@@ -111,6 +111,7 @@ namespace Payload.MonoScript
             //TODO:May not included in build
             LineMat = new Material(Shader.Find("Hidden/Internal-Colored"));
             LineMat.SetInt("_ZTest", (int)UnityEngine.Rendering.CompareFunction.Disabled);
+            drawCollider.UpdateCache(FindObjectsOfType<GameObject>(), GetComponent<Camera>().transform.position, DrawDistance, "");
         }
         private void OnPostRender()
         {
