@@ -9,11 +9,14 @@ namespace Payload.MonoScript
         private void Awake()
         {
             gameObject = base.gameObject;
-
+            
             gameObject.AddComponent<Console>();
-            gameObject.AddComponent<GameStatistic>();
-            gameObject.AddComponent<Inspector>();
+            gameObject.AddComponent<FreeCamera>();
             gameObject.AddComponent<InjectAssetBundle>();
+            gameObject.AddComponent<Inspector>();
+            gameObject.AddComponent<SceneHierarchy>();
+            gameObject.AddComponent<Statistic>();
+            gameObject.AddComponent<Tetris>();
         }
         
     }

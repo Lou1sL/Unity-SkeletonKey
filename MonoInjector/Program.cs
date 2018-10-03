@@ -22,11 +22,11 @@ namespace MonoInjector
         static void Main(string[] args)
         {
             Injection();
-            Ejection();
+            //Ejection();
             Exit();
         }
 
-        static void Injection()
+        private static void Injection()
         {
             Console.WriteLine("Start Injection: Press ENTER");
             Console.ReadLine();
@@ -86,7 +86,7 @@ namespace MonoInjector
             Console.WriteLine("AssetBundle Injection Will Be Started In 5 Sec!");
             Console.WriteLine("INJECTION COMPLETED!");
         }
-        static void Ejection()
+        private static void Ejection()
         {
             Console.WriteLine("Start Ejection: Press ENTER");
             Console.ReadLine();

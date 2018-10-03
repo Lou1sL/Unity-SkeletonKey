@@ -6,7 +6,7 @@ using UnityEngine;
 namespace Payload.MonoScript
 {
     [SuppressMessage("Microsoft.Design", "CS0618")]
-    public class GameStatistic : MonoBehaviour
+    public class Statistic : MonoBehaviour
     {
 
         private bool Active = true;
