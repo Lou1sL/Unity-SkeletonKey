@@ -44,21 +44,15 @@ namespace Payload.MonoScript
 
         private Graph graph = new Graph(15, 35);
         private KeyCode PlayTetris = KeyCode.Pause;
-        public bool Activited { get; private set; }
-        public void Active()
-        {
-            Activited = true;
-            graph.Clear();
-        }
-        public void DeActive()
-        {
-            Activited = false;
-            graph.Clear();
-        }
+        public bool Activated { get; private set; }
 
         private void Update()
         {
-            
+            if (Input.GetKeyDown(PlayTetris))
+            {
+                Activated = !Activated;
+                graph.Clear();
+            }
         }
         private void OnGUI()
         {
