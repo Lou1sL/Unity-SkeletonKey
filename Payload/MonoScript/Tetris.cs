@@ -83,6 +83,8 @@ namespace Payload.MonoScript
         public class Graph
         {
 
+            public int Score { get; private set; }
+
             public enum Command { Left, Right, Rotate }
             //标准俄罗斯方块棋盘大小：10x24
             private int[,] graph = new int[24, 10];
@@ -152,6 +154,7 @@ namespace Payload.MonoScript
 
                 mvobjrow = 0;
                 mvobjcolumn = 0;
+                Score = 0;
             }
             /// <summary>
             /// 产生一个Obj
@@ -207,6 +210,9 @@ namespace Payload.MonoScript
             /// </summary>
             private void RowClearChk()
             {
+
+                int cleared = 0;
+
                 for (int i = Row - 1; i >= 0; i--)
                 {
                     bool clearthisrow = true;
@@ -239,8 +245,21 @@ namespace Payload.MonoScript
                                     graph[ii, j] = graph[ii - 1, j];
                                 }
                             }
-
                         }
+
+                        i--;
+                        cleared++;
+
+
+                        if (cleared > 0)
+                            switch (cleared)
+                            {
+                                case 1: Score += 100; break;
+                                case 2: Score += 300; break;
+                                case 3: Score += 600; break;
+                                case 4: Score += 1000; break;
+                                default: Score += cleared * 300; break;
+                            }
                     }
                 }
             }
@@ -319,6 +338,11 @@ namespace Payload.MonoScript
             float squaresz = Screen.height / (graph.Row > graph.Column ? graph.Row : graph.Column);
             float X = squaresz * graph.Row / 2f;
 
+            //棋盘边界
+            GUI.Button(new Rect(X - squaresz, 0, squaresz, Screen.height), "");
+            GUI.Button(new Rect(X + graph.Column * squaresz, 0, squaresz, Screen.height), "");
+
+            //画格子
             for (int i = 0; i < graph.Row; i++)
             {
                 for (int j = 0; j < graph.Column; j++)
@@ -326,8 +350,12 @@ namespace Payload.MonoScript
                     if (graph.GetPoint(i, j) > 0) GUI.Button(new Rect(squaresz * j + X, squaresz * i, squaresz, squaresz), "");
                 }
             }
-            GUI.Button(new Rect(X - squaresz, 0, squaresz, Screen.height), "");
-            GUI.Button(new Rect(X + graph.Column * squaresz, 0, squaresz, Screen.height), "");
+
+            //分数
+
+            GUIStyle style = new GUIStyle(GUI.skin.label) { fontSize = 40 };
+            GUI.Label(new Rect(10, Screen.height / 2f, Screen.width / 2f, Screen.height / 2f), "SCORE:\n" + graph.Score + "", style);
+
 
         }
     }
