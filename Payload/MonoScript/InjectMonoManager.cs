@@ -16,7 +16,7 @@ namespace Payload.MonoScript
             gameObject.AddComponent<Inspector>();
             gameObject.AddComponent<SceneHierarchy>();
             gameObject.AddComponent<Statistic>();
-            gameObject.AddComponent<Tetris>();
+            //gameObject.AddComponent<Tetris>();
         }
         
     }
