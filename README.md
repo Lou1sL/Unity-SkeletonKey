@@ -6,10 +6,4 @@
 
 按键请看Wiki
 
-效果图:
-<div align="center">
-<img src="screenshot.png"/>
-</div>
-<div align="center">
-<img src="screenshot2.png"/>
-</div>
+[效果](https://www.bilibili.com/video/BV1jW411z7Zn)
