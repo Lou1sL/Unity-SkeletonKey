@@ -6,4 +6,3 @@
 
 按键请看Wiki
 
-[效果](https://www.bilibili.com/video/BV1jW411z7Zn)
